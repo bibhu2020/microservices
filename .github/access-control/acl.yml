@@ -1,0 +1,14 @@
+# .github/access-control/acl.yml
+name: Access control list
+description: List of members and permissions
+resource: repository
+
+configuration:
+  manageAccess:
+    - member: mishrabp
+      role: admin
+    - member: v-bimishra
+      role: admin  
+    - member: bm80177
+      role: write
+
