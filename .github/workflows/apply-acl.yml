@@ -1,29 +1,28 @@
 name: Apply Access Control
 
 on:
-  workflow_dispatch:  # allows you to run it manually from the Actions tab
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/access-control/acl.yml'
 
 jobs:
   apply-acl:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # for authentication if using GitHub Apps
-
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install PyYAML requests
+        run: pip install pyyaml requests
 
-      - name: Run access control script
+      - name: Apply access control
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # You may use a PAT with `admin:org` scope
-        run: |
-          python3 .github/scripts/apply_acl.py
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: python .github/scripts/apply_acl.py
