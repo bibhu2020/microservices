@@ -10,5 +10,5 @@ configuration:
     - member: v-bimishra
       role: admin  
     - member: bm80177
-      role: write
+      role: read
 
