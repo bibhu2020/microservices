@@ -30,14 +30,16 @@ jobs:
 
             const branchType = isBug ? 'hotfix' : 'feature';
 
-            // Reuse the logic used during creation to slugify the title
-            const titleSlug = issue.title
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, '-')   // Replace non-alphanumerics with hyphen
-              .replace(/^-+|-+$/g, '')        // Trim leading/trailing hyphens
-              .substring(0, 25);              // Truncate to max 25 chars
+            // Extract shortname from issue body (like during creation)
+            const body = issue.body.toLowerCase();
+            const shortnameMatch = body.match(/short name for branch.*\n\s*([a-z0-9\-]{1,15})/i);
+            if (!shortnameMatch) {
+              console.log("No shortname found, skipping branch deletion.");
+              return;
+            }
+            const shortname = shortnameMatch[1].toLowerCase();
 
-            const branchName = `${branchType}/${issueNumber}-${titleSlug}`;
+            const branchName = `${branchType}/${issueNumber}-${shortname}`;
             const fullRef = `heads/${branchName}`;
 
             try {
