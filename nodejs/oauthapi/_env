@@ -1,0 +1,38 @@
+# Environment variables for the Web Api Server
+PORT=8081                                                       # Port for the Web Api Server
+NODE_ENV=development                                            # Node environment
+API_KEY=                                                        # API Key for the Web Api Server (Optional) - If not provided, the API will authenticate the incoming requests using Azure AD Bearer Token
+
+# Azure AD Configuration for the Web Api Server (Mandatory) - Rest API uses Azure AD for authorizing the incoming requests
+AZURE_TENANT_ID=                                                # Azure Tenant ID of Bibhu Personal Tenant
+AZURE_CLIENT_ID=                                                # App in Bibhu Personal Tenant
+AZURE_CLIENT_SECRET=                                            # Optional if you are using FIC. Expires on 2025-02-10
+MANAGED_IDENTITY_CLIENT_ID=                                     # It's from MS corp Tenant
+
+# Email Service Uses it for queueing the emails (optional if you do not want to send emails)
+SERVICE_BUS_NAMESPACE=
+SERVICE_BUS_QUEUE_NAME=emailq
+
+# MS Corp Tenant Communication Service - Setup in Lima Bean V2 subscription  (optional if you do not want to send emails)
+COMMUNICATION_SERVICE_ENDPOINT=
+SENDER_EMAIL= 
+
+# Azure Cognitive Services / Azure Open AI Configuration. (optional if you do not want to AI service for content translation)
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_MODEL=gpt-4o
+
+# Cosmos DB Configuration - Api stores PO records here  (optional if you do not want to test cosmosdb)
+COSMOS_DB_ENDPOINT=
+COSMOS_DB_DATABASE_ID=oauthdb
+
+# App Isnight Monitoring Configuration (optional if you do not want to monitor the app)
+APPINSIGHTS_CONNECTION_STRING=
+
+# Weather Service 3rd Party API (optional if you do not want to test 3rd party API: https://api.openweathermap.org)
+WEATHER_SERVICE_API_KEY=
+
+# Redis Cache Configs
+AZURE_CACHE_FOR_REDIS_HOST_NAME=
+REDIS_SERVICE_PRINCIPAL_ID=
+USE_CACHE=true

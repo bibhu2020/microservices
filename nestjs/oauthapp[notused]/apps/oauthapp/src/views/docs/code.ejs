@@ -1,0 +1,62 @@
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <h2 class="text-2xl font-bold mb-4">1. Authorization Code Grant Flow</h2>
+    
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Overview</h3>
+        <p class="mb-4">
+            According to the OAuth authorization code grant flow, an authorization server sends a temporary (authorization) code to a client. The code is exchanged for a token. This flow is available for confidential clients, for example, web applications with a backend that can store credentials securely. This way, the client can obtain one or more of the following token types:
+        </p>
+        <ul class="list-disc pl-6 mb-4">
+            <li>Access tokens</li>
+            <li>Refresh tokens</li>
+            <li>ID tokens</li>
+        </ul>
+        <img src="/images/oauth-code-flow.png" alt="OAuth Code Flow" class="mb-6 w-full h-auto rounded-md shadow-sm">
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Steps</h3>
+        <ol class="list-decimal pl-6 space-y-2">
+            <li>A user tries to access the application (the client).</li>
+            <li>The client calls the authorization server's authorize endpoint.</li>
+            <pre class="bg-gray-800 text-white p-4 rounded-md">
+curl --location \
+--get \
+--url "https://$TENANT_ID.$REGION_ID.authz.cloudentity.io/$TENANT_ID/$WORKSPACE_ID/oauth2/authorize" \
+--data-urlencode "response_type=code" \
+--data-urlencode "client_id=$CLIENT_ID"
+            </pre>
+            <li>The authorization server responds with the redirect URI. The user gets redirected to the login & content form (if any).</li>
+            <li>The user authenticates with his credentials and gives his consent.</li>
+            <li>The authorization server issues an authorization code.</li>
+            <li>The client application requests authentication to the token endpoint using the authentication method configured and the authorization code provided in the previous step.
+                <p class="mt-2">The <code>grant_type</code> value in the API call must be <code>authorization_code</code>.</p>
+            </li>
+            <pre class="bg-gray-800 text-white p-4 rounded-md">
+curl --request POST \
+--url "https://$TENANT_ID.$REGION_ID.authz.cloudentity.io/$TENANT_ID/$WORKSPACE_ID/oauth/token" \
+--data-raw "grant_type=authorization_code&code=$CODE&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET"
+            </pre>
+            <li>The authorization server validates the authorization code.</li>
+            <li>The authorization server returns the token.</li>
+            <li>The client application requests protected resources (API / Azure Resources) from the resource server and submits the token it received in the previous step.</li>
+            <li>The resource server validates the token and responds with the requested resources.</li>
+        </ol>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Use Case</h3>
+        <ul class="list-disc pl-6 space-y-2">
+            <li>You are developing an enterprise web application that needs to read user profiles and calendar events from Microsoft 365 using the Microsoft Graph API. To ensure secure access to the user's Microsoft 365 data, you implement the Authorization Code Grant Flow, allowing your web application to obtain an access token on behalf of the user.</li>
+            <li>You are building a web application that allows users to manage their data stored in Azure Blob Storage. To ensure secure access to the user's Azure resources, you implement the Authorization Code Grant Flow, which provides a secure way for your web application to obtain an access token on behalf of the user.</li>
+        </ul>
+    </div>
+
+    <div>
+        <h3 class="text-xl font-semibold mb-2">Security</h3>
+        <ul class="list-disc pl-6 space-y-2">
+            <li><strong>High security:</strong> Access tokens are exchanged server-to-server, reducing the risk of exposure.</li>
+            <li>Access token issued to the end user is used to access resource. If the individual user does not have access, they cannot access the resource.</li>
+        </ul>
+    </div>
+</div>

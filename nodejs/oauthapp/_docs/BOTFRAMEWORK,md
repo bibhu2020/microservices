@@ -1,0 +1,17 @@
+# Bot Framework
+Microsoft bot framework v4 is a collection of services, tools, and SDKs that offers developer powerful foundation to create, and connect smart bots to channels. The channel can be simple web chat which integrates with website or app, facebook channel or skype channel.
+
+![image.png](./images/botecosystem.png)
+
+# Pre-requisites
+sudo apt-get install libsecret-1-dev
+
+npm install -g npm
+npm install -g yo
+
+npm install -g generator-botbuilder
+
+
+# Create Echo Bot using Scaffolder
+yo botbuilder
+

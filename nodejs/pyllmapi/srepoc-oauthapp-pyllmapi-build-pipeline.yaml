@@ -1,0 +1,48 @@
+trigger:
+  branches:
+    include:
+      - monitoring
+  paths:
+    include:
+      - _nonaks/pyllmapi/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  pythonVersion: '3.12.3'
+  buildDir: '_nonaks/pyllmapi/build'
+  artifactName: 'drop'
+  artifactPath: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'  # Define artifact path consistently
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(pythonVersion)'
+    addToPath: true
+  displayName: 'Set up Python'
+
+- script: |
+    # Create a Python virtual environment and install dependencies
+    python -m venv venv
+    source venv/bin/activate
+    python -m pip install --upgrade pip
+    pip install -r _nonaks/pyllmapi/requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    # Prepare the build directory and copy the source files
+    mkdir -p $(buildDir)
+    cp -r _nonaks/pyllmapi/* $(buildDir)
+    
+    # Navigate to the build directory and create the deployment zip file
+    cd $(buildDir)
+    zip -r $(Build.ArtifactStagingDirectory)/$(artifactName).zip . -x '*.yaml'
+  displayName: 'Create deployment zip'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'  # Correct path for artifact location
+    ArtifactName: '$(artifactName)'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact'

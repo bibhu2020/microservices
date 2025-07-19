@@ -1,0 +1,83 @@
+
+<div class="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+    <h1 class="text-2xl font-bold text-center mb-6 text-blue-600">Get a Weather Report (using OpenAI)</h1>
+    
+    <!-- Input for the weather query -->
+    <div class="mb-4">
+        <input 
+            type="text" 
+            id="queryInput" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            value="Weather in New York on 2024-09-15"
+            placeholder="Ask for a weather report, e.g. 'Weather in New York on 2024-09-15'" />
+    </div>
+    
+    <!-- Button to trigger the query -->
+    <div class="text-center mb-6">
+        <button 
+            onclick="getWeatherReport()" 
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Get Report
+        </button>
+    </div>
+
+    <!-- Section to display the weather report values -->
+    <h2 class="text-xl font-semibold mb-2 text-gray-700">Weather Report:</h2>
+    <div id="weatherReport" class="bg-gray-100 p-4 rounded-lg text-gray-800 text-sm overflow-auto border border-gray-300"></div>
+</div>
+
+<!-- Custom JavaScript that uses Fetch API -->
+<script>
+    async function getWeatherReport() {
+        const queryInput = document.getElementById('queryInput');
+        const weatherReportElement = document.getElementById('weatherReport');
+        const query = queryInput.value.trim();
+
+        if (!query) {
+            alert('Please enter a query!');
+            return;
+        }
+
+        weatherReportElement.textContent = 'Fetching...';
+
+        try {
+            // Use Fetch API to send POST request
+            const response = await fetch('http://localhost:8081/unauthorized/api/openai/weather', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            //alert(JSON.stringify(data));
+            
+            // Display specific values from the JSON
+            const weather = data.report.weather;
+            const location = data.report.location;
+            const date = data.report.date;
+            const temperature = weather.temperature;
+            const humidity = weather.humidity;
+            const windSpeed = weather.wind_speed;
+            const description = weather.description;
+
+            weatherReportElement.innerHTML = `
+                <p><strong>Location:</strong> ${location}</p>
+                <p><strong>Date:</strong> ${date}</p>
+                <p><strong>Temperature:</strong> ${temperature}</p>
+                <p><strong>Humidity:</strong> ${humidity}</p>
+                <p><strong>Wind Speed:</strong> ${windSpeed}</p>
+                <p><strong>Description:</strong> ${description}</p>
+            `;
+            //weatherReportElement.innerText = JSON.stringify(data, null, 2);
+        } catch (error) {
+            weatherReportElement.textContent = 'Error occurred while fetching the weather report.' + error;
+            console.error('Error:', error);
+        }
+    }
+</script>

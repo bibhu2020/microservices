@@ -1,0 +1,6 @@
+{
+    "watch": ["./**/*.js, controllers/**/*.js"],
+    "ext": "js,json,ejs",
+    "exec": "node index.js"
+  }
+  

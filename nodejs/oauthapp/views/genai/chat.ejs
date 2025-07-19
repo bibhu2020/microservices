@@ -1,0 +1,61 @@
+<div class="w-full max-w-lg bg-white rounded-lg shadow-lg">
+    <div class="p-4 border-b border-gray-200">
+        <h2 class="text-xl font-bold">Chat with Bot</h2>
+    </div>
+    <div id="chatContainer" class="p-4 h-96 overflow-y-auto">
+        <!-- Chat messages will be appended here -->
+    </div>
+    <div class="p-4 border-t border-gray-200">
+        <form id="chatForm" class="flex">
+            <input type="text" id="chatInput" class="flex-1 p-2 border rounded-l-lg focus:outline-none" placeholder="Type your message...">
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded-r-lg hover:bg-blue-600">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatContainer = document.getElementById('chatContainer');
+    const sessionId = generateSessionId();
+
+    chatForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const userMessage = chatInput.value.trim();
+        if (userMessage === '') return;
+
+        appendMessage('You', userMessage, 'bg-blue-100', 'text-blue-800');
+        chatInput.value = '';
+
+        try {
+            const genApiURL = '<%= genApiURL %>/chatbot';
+
+            const response = await fetch(genApiURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ session_id: sessionId, text: userMessage })
+            });
+            const result = await response.json();
+            appendMessage('Bot', result.data, 'bg-gray-100', 'text-gray-800');
+        } catch (error) {
+            console.log('Error sending message:', error);
+            appendMessage('Bot', 'Sorry, something went wrong.', 'bg-red-100', 'text-red-800');
+        }
+    });
+
+    function appendMessage(sender, message, ...bgClasses) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('p-2', 'my-2', 'rounded-lg', ...bgClasses);
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function generateSessionId() {
+        return 'xxxx-xxxx-xxxx-xxxx'.replace(/[x]/g, () => {
+            return (Math.random() * 16 | 0).toString(16);
+        });
+    }
+</script>

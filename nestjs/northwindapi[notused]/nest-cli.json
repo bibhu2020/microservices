@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": false
+  },
+  "projects": {
+    "applogger": {
+      "type": "library",
+      "root": "libs/applogger",
+      "entryFile": "index",
+      "sourceRoot": "libs/applogger/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/applogger/tsconfig.lib.json"
+      }
+    }
+  }
+}

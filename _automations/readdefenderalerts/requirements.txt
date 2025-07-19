@@ -1,0 +1,1 @@
+pip3 install pandas openpyxl azure-identity azure-mgmt-security azure-mgmt-subscription

@@ -1,0 +1,270 @@
+<aside class="relative bg-sidebar h-screen w-64 hidden sm:block shadow-xl">
+        <div class="p-6">
+            <a href="/" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">OAuth</a>
+        </div>
+        <nav class="text-white text-base font-semibold pt-3">
+            <div>
+                <a href="#" class="flex items-center text-white py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'docSubmenu')">
+                    <i class="fas fa-plus mr-3" id="docIcon"></i>
+                    Document
+                </a>
+                <div id="docSubmenu" class="pl-12 submenu">
+                    <a href="/" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="OAuth Overview">
+                        <i class="fas fa-book mr-3"></i>
+                        OAuth Overview
+                    </a>
+                    <a href="/home/code" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Authorization Code Flow">
+                        <i class="fas fa-code-branch mr-3"></i>
+                        Authorization Code Flow
+                    </a>
+                    <a href="/home/Credential" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Client Credential Flow">
+                        <i class="fas fa-key mr-3"></i>
+                        Client Credential Flow
+                    </a>
+                    <a href="/home/implicit" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Implicit Flow">
+                        <i class="fas fa-sign-in-alt mr-3"></i>
+                        Implicit Flow
+                    </a>
+                    <a href="/home/password" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Password Credential Flow">
+                        <i class="fas fa-unlock-alt mr-3"></i>
+                        Password Credential Flow
+                    </a>
+                </div>
+            </div>
+            <% if (!userName) { %>
+            <div>
+                <a href="#" class="flex items-center text-white py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'apiCallAnonymous')">
+                    <i class="fas fa-plus mr-3" id="azureIcon"></i>
+                    Api Call (Anonymous)
+                </a>
+                <div id="apiCallAnonymous" class="pl-12 submenu">
+                    <a href="/azure/readKv?name=fictokentesting&accessMethod=MI" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - MI">
+                        <i class="fas fa-key mr-3"></i>
+                        Read KV - MI
+                    </a>
+                    <a href="/azure/readKv?name=fictokentesting&accessMethod=FIC" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - FIC">
+                        <i class="fas fa-lock mr-3"></i>
+                        Read KV - FIC
+                    </a>
+                    <a href="/azure/readKv?name=fictokentesting&accessMethod=CS" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - CS">
+                        <i class="fas fa-fingerprint mr-3"></i>
+                        Read KV - CS
+                    </a>
+                    <a href="/azure/weather" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read Weather - 3rd Party">
+                        <i class="fas fa-cloud-rain mr-3"></i>
+                        Read Weather - 3rd Party
+                    </a>
+                </div>
+            </div>
+            <% } %>
+            <% if (userName) { %>
+            <div>
+                <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'apiCallBearer')">
+                    <i class="fas fa-plus mr-3" id="weatherIcon"></i>
+                    Api Call (Protected)
+                </a>
+                <div id="apiCallBearer" class="pl-12 submenu">
+                    <a href="/azure/readKv/protected?name=fictokentesting&accessMethod=MI" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - MI2">
+                        <i class="fas fa-key mr-3"></i>
+                        Read KV - MI
+                    </a>
+                    <a href="/azure/readKv/protected?name=fictokentesting&accessMethod=FIC" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - FIC2">
+                        <i class="fas fa-lock mr-3"></i>
+                        Read KV - FIC
+                    </a>
+                    <a href="/azure/readKv/protected?name=fictokentesting&accessMethod=CS" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - CS2">
+                        <i class="fas fa-fingerprint mr-3"></i>
+                        Read KV - CS
+                    </a>
+                    <!-- <a href="/azure/readKv/protected?name=fictokentesting&accessMethod=UT" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read KV - User Token2">
+                        <i class="fas fa-user-lock mr-3"></i>
+                        Read KV - User Token
+                    </a> -->
+                    <a href="/azure/weather/protected" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read Weather - 3rd Party2">
+                        <i class="fas fa-cloud-rain mr-3"></i>
+                        Read Weather - 3rd Party
+                    </a>
+                    <% if (roles && (roles.includes('superadmin') || roles.includes('sreadmin') )) { %>
+                    <a href="/azure/users/protected" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read_User">
+                        <i class="fas fa-users mr-3"></i>
+                        Read Users
+                    </a>
+                    <a href="/azure/send-email" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Send-email">
+                        <i class="fas fa-envelope mr-3"></i>
+                        Send Email
+                    </a>
+                    <% } %>
+                </div>
+            </div>
+
+            <div>
+                <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'genAIUI')">
+                    <i class="fas fa-plus mr-3" id="weatherIcon"></i>
+                    Generative AI
+                </a>
+                <div id="genAIUI" class="pl-12 submenu">
+                    <a href="/genai/translate" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="genAIAUITranslate">
+                        <i class="fas fa-globe mr-3"></i>
+                        Translate
+                    </a>
+                    <a href="/genai/chat" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="genAIAUIChat">
+                        <i class="fas fa-robot mr-3"></i>
+                        Chat Bot
+                    </a>
+                    <a href="/genai/loganalysis" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="genAIAUIChat">
+                        <i class="fas fa-robot mr-3"></i>
+                        Log Analysis
+                    </a>
+                </div>
+            </div>
+            <% } %>
+
+            <% if (roles && (roles.includes('superadmin') || roles.includes('sreadmin') )) { %>
+            <div>
+                <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'auditUI')">
+                    <i class="fas fa-plus mr-3" id="weatherIcon"></i>
+                    SRE Audit
+                </a>
+                <div id="auditUI" class="pl-12 submenu">
+                    <a href="/audit/list" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="auditUIUsers">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        User Actions
+                    </a>
+                </div>
+            </div>
+            <% } %>
+
+
+            <% if (roles && roles.includes('superadmin')) { %>
+            <div>
+                <a href="#" class="flex items-center text-white opacity-75 hover:opacity-100 py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'poUI')">
+                    <i class="fas fa-plus mr-3" id="weatherIcon"></i>
+                    Under Construction
+                </a>
+                <div id="poUI" class="pl-12 submenu">
+                    <a href="/po" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="poSubmit">
+                        <i class="fas fa-paper-plane mr-3"></i>
+                        Submit PO
+                    </a>
+                    <a href="/po/list" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="poStatus">
+                        <i class="fas fa-list-alt mr-3"></i>
+                        PO List
+                    </a>
+                    <a href="/azure/weatheropenai" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="Read Weather - 3rd Party">
+                        <i class="fas fa-cloud-rain mr-3"></i>
+                        Read Weather - Azure Open AI
+                    </a>
+                </div>
+            </div>
+            <% } %>
+
+            <% if (!userName) { %>
+            <div>
+                <a href="/" class="flex items-center text-white py-4 pl-6 nav-item" onclick="toggleSubmenu(event, 'spaSubmenu')">
+                    <i class="fas fa-plus mr-3" id="docIcon"></i>
+                    SPA
+                </a>
+                <div id="spaSubmenu" class="pl-12 submenu">
+                    <a href="/spa" class="flex items-center py-2 hover:text-gray-300 submenu-item" data-submenu-id="spaHome">
+                        <i class="fas fa-users mr-3"></i>
+                        Read Users
+                    </a>
+                </div>
+            </div>
+            <% } %>
+        </nav>
+    </aside>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const activeItem = getCookie("activeNavItem");
+            const activeSubmenuItem = getCookie("activeSubmenuItem");
+            if (activeItem) {
+                const activeElement = document.querySelector(`[onclick*="${activeItem}"]`);
+                if (activeElement) {
+                    activeElement.classList.add("nav-item-active");
+                    const submenu = document.getElementById(activeItem);
+                    submenu.classList.add("submenu-active");
+                    const icon = submenu.previousElementSibling.querySelector(".fa-plus, .fa-minus");
+                    icon.classList.remove("fa-plus");
+                    icon.classList.add("fa-minus");
+                }
+            }
+            if (activeSubmenuItem) {
+                const activeSubmenuElement = document.querySelector(`[data-submenu-id="${activeSubmenuItem}"]`);
+                if (activeSubmenuElement) {
+                    activeSubmenuElement.classList.add("submenu-item-active");
+                    const parentSubmenu = activeSubmenuElement.closest('.submenu');
+                    parentSubmenu.classList.add("submenu-active");
+                    const icon = parentSubmenu.previousElementSibling.querySelector(".fa-plus, .fa-minus");
+                    icon.classList.remove("fa-plus");
+                    icon.classList.add("fa-minus");
+                    parentSubmenu.previousElementSibling.classList.add("nav-item-active");
+                }
+            }
+        });
+
+        function toggleSubmenu(event, submenuId) {
+            event.preventDefault();
+            const submenu = document.getElementById(submenuId);
+            const icon = submenu.previousElementSibling.querySelector(".fa-plus, .fa-minus");
+
+            // Close all open submenus except the one clicked
+            document.querySelectorAll(".submenu").forEach(item => {
+                if (item !== submenu) {
+                    item.classList.remove("submenu-active");
+                    item.previousElementSibling.querySelector(".fa-minus")?.classList.add("fa-plus");
+                    item.previousElementSibling.querySelector(".fa-minus")?.classList.remove("fa-minus");
+                }
+            });
+
+            submenu.classList.toggle("submenu-active");
+            icon.classList.toggle("fa-plus");
+            icon.classList.toggle("fa-minus");
+
+            // Remove active class from all nav items
+            document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("nav-item-active"));
+
+            // Add active class to the clicked nav item
+            submenu.previousElementSibling.classList.add("nav-item-active");
+
+            // Store the active nav item in a cookie
+            setCookie("activeNavItem", submenuId, 7);
+        }
+
+        document.querySelectorAll('.submenu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all submenu items
+                document.querySelectorAll('.submenu-item').forEach(subitem => subitem.classList.remove('submenu-item-active'));
+
+                // Add active class to the clicked submenu item
+                item.classList.add('submenu-item-active');
+
+                // Store the active submenu item in a cookie
+                setCookie('activeSubmenuItem', item.getAttribute('data-submenu-id'), 7);
+            });
+        });
+
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const cname = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+    </script>

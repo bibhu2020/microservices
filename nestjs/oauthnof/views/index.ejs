@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Broadcast Message</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    function sendMessage() {
+      const editor = document.getElementById('richInput');
+      const msg = editor.innerHTML.trim();
+      const plainText = editor.innerText.trim();
+
+      // if (plainText.length === 0 || plainText.length > 30) {
+      //   alert("Message must be between 1 and 30 characters.");
+      //   return;
+      // }
+
+      socket.emit('newMessage', { message: msg });
+      editor.innerHTML = '';
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-4">
+    <h1 class="text-xl font-bold text-gray-800">Broadcast Message</h1>
+
+    <div 
+      id="richInput" 
+      contenteditable="true"
+      class="border rounded-lg p-3 min-h-[80px] max-h-[160px] overflow-auto bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      placeholder="Enter your message here..."
+    ></div>
+    <div class="text-sm text-gray-500">Max 30 characters (rich text allowed)</div>
+
+    <button 
+      onclick="sendMessage()" 
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
+    >
+      Send Broadcast
+    </button>
+  </div>
+</body>
+</html>

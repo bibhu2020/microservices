@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Blogging</title>
+    <style>
+        /* Center the content vertically and horizontally */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container for the PNG image */
+        .image-container {
+            text-align: center;
+            height: 50%; /* 50% of the viewport height */
+            width: 100%; /* Full width */
+        }
+
+        /* PNG image */
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            margin: auto; /* Center horizontally */
+        }
+
+        /* Text at the top and bottom */
+        .text {
+            text-align: center;
+            font-size: 24px;
+            position: absolute;
+            width: 100%;
+        }
+
+        .top-text {
+            top: 50px;
+            font-weight: bold;
+            font-size: 32px; /* Larger font size */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow */
+        }
+
+        .bottom-text2 {
+            bottom: 50px;
+            font-weight: bold;
+            font-size: 32px; /* Larger font size */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow */
+        }
+
+        .bottom-text {
+            bottom: 200px;
+            color: #666; /* Text color */
+            font-style: italic; /* Italics */
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- body or the main content -->
+    <%- body %>
+
+</body>
+</html>

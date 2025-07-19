@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azure AD OAuth2 with PKCE</title>
+</head>
+<body>
+  <h1>Azure AD OAuth2 with PKCE</h1>
+  <button id="loginButton">Login with Azure AD</button>
+  <pre id="result"></pre>
+  <script>
+    const tenantId = '72f988bf-86f1-41af-91ab-2d7cd011db47';
+    const clientId = '4d95fd2e-e370-47c6-827c-7270aa707238';
+    const redirectUri = 'http://localhost:3000'; // Your redirect URI
+    const authorizationEndpoint = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`;
+    const tokenEndpoint = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+    const scope = `api://4d95fd2e-e370-47c6-827c-7270aa707238/default`
+
+    const generateCodeVerifier = () => {
+      const array = new Uint8Array(32);
+      window.crypto.getRandomValues(array);
+      return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    const generateCodeChallenge = async (codeVerifier) => {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(codeVerifier);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    };
+
+    const loginButton = document.getElementById('loginButton');
+    const resultElement = document.getElementById('result');
+
+    loginButton.addEventListener('click', async () => {
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+      console.log(`Code Verifier: ${codeVerifier}`);
+      console.log(`Code Challenge: ${codeChallenge}`);
+
+      // Store the code verifier in local storage
+      localStorage.setItem('code_verifier', codeVerifier);
+
+      const authorizationUrl = `${authorizationEndpoint}?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+
+      window.location.href = authorizationUrl;
+    });
+
+    const handleRedirect = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const authorizationCode = params.get('code');
+
+      if (authorizationCode) {
+        console.log(`Authorization Code: ${authorizationCode}`);
+
+        // Retrieve the code verifier from local storage
+        const codeVerifier = localStorage.getItem('code_verifier');
+        console.log(`Code Verifier (during token exchange): ${codeVerifier}`);
+
+        const tokenRequestBody = new URLSearchParams({
+          client_id: clientId,
+          grant_type: 'authorization_code',
+          code: authorizationCode,
+          redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
+        });
+
+        try {
+          const response = await fetch(tokenEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: tokenRequestBody,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Token exchange failed: ${errorData.error_description || response.statusText}`);
+          }
+
+          const data = await response.json();
+          const accessToken = data.access_token;
+
+          // Show the access token in the UI (you can use this token for API requests)
+          resultElement.textContent = `Access Token:\n${JSON.stringify(data, null, 2)}`;
+
+          // Clear the code verifier from local storage
+          localStorage.removeItem('code_verifier');
+        } catch (error) {
+          resultElement.textContent = `Error exchanging authorization code for tokens: ${error.message}`;
+        }
+      }
+    };
+
+    window.onload = handleRedirect;
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: srepoc-oauthapp-pyllmapi-build-pipeline
+      source: srepoc-oauthapp-pyllmapi-build-pipeline  # Corrected pipeline name (no backslashes)
+      project: 'Production Dev'
+      trigger: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  webAppName: 'pyllmapi'
+  resourceGroupName: 'oauthpocrg'
+  artifactName: 'drop'
+  artifactPath: '$(Pipeline.Workspace)/drop/$(artifactName).zip'  # Corrected artifact path
+
+stages:
+- stage: Deploy
+  jobs:
+  - job: DeployToAzure
+    steps:
+    # Download the artifact from the build pipeline
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'specific'
+        project: 'Production Dev'
+        pipeline: 'srepoc-oauthapp-pyllmapi-build-pipeline'  # Correct pipeline name reference
+        runVersion: 'latest'  # Always get the latest successful build
+        artifact: 'drop'  # The artifact published in the build pipeline
+        targetPath: '$(Pipeline.Workspace)/drop'  # Where the artifact will be saved
+      displayName: 'Download build artifact'
+
+    # Deploy the app to Azure Web App
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: 'srepoc-limabean-connection'  # Make sure to use the correct Azure subscription name
+        appName: '$(webAppName)'  # The name of the Azure Web App
+        package: '$(artifactPath)'  # Path to the downloaded artifact
+        appType: 'webApp'  # Deploying to an Azure Web App
+      displayName: 'Deploy web app to Azure'
+
+    # Check the health of the deployed site
+    - script: |
+        http_code=$(curl -s -o /dev/null -w "%{http_code}" https://$(webAppName).azurewebsites.net)
+        if [ "$http_code" -ne 200 ]; then
+          echo "Site is not healthy (HTTP code: $http_code)"
+          exit 1
+        else
+          echo "Site is healthy (HTTP code: $http_code)"
+        fi
+      displayName: 'Check site health'

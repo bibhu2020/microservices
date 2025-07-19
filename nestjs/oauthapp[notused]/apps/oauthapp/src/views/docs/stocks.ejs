@@ -1,0 +1,146 @@
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Socket.IO CDN -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+
+<h1>📈 24-Hour Stock Index Tracker</h1>
+  <div class="chart-container">
+    <canvas id="stockChart" height="400"></canvas>
+  </div>
+
+  <script>
+    const socket = io('http://localhost:3002', {
+      transports: ['websocket'],
+    });
+
+    const MAX_POINTS = 17280; // 24 hours * 60 min * 60 sec / 5 sec
+
+    const timeLabels = [];
+    const dowData = [];
+    const spData = [];
+
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [
+          {
+            label: 'Dow Jones',
+            data: dowData,
+            borderColor: 'rgba(59, 130, 246, 1)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.3,
+            pointRadius: 0,
+          },
+          {
+            label: 'S&P 500',
+            data: spData,
+            borderColor: 'rgba(239, 68, 68, 1)',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            tension: 0.3,
+            pointRadius: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time',
+            },
+            ticks: {
+              maxTicksLimit: 10,
+              callback: (val, index, values) => {
+                return timeLabels[index];
+              },
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Index Value',
+            },
+            min: minY - 200, // Slightly below min
+            max: maxY + 200, // Slightly above max
+            beginAtZero: false,
+          },
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+        },
+      },
+    });
+
+    function addDataPoint(data) {
+      const time = new Date(data.timestamp).toLocaleTimeString();
+
+      timeLabels.push(time);
+      dowData.push(data.dowJones);
+      spData.push(data.sp500);
+
+      // Update dynamic min/max
+      minY = Math.min(minY, data.dowJones, data.sp500);
+      maxY = Math.max(maxY, data.dowJones, data.sp500);
+
+      // Trim excess data to keep at max 17280 points
+      if (timeLabels.length > MAX_POINTS) {
+        timeLabels.shift();
+        dowData.shift();
+        spData.shift();
+      }
+
+      // Update the Y-axis dynamically
+      chart.options.scales.y.min = minY - 200;
+      chart.options.scales.y.max = maxY + 200;
+
+      chart.update();
+    }
+
+    socket.on('connect', () => {
+      console.log('🔌 Connected to WebSocket server');
+    });
+
+    socket.on('stockHistory', (history) => {
+      console.log('📜 Received stock history:', history.length);
+
+      history.forEach(data => {
+        const time = new Date(data.timestamp).toLocaleTimeString();
+        timeLabels.push(time);
+        dowData.push(data.dowJones);
+        spData.push(data.sp500);
+
+        // Update dynamic min/max
+        minY = Math.min(minY, data.dowJones, data.sp500);
+        maxY = Math.max(maxY, data.dowJones, data.sp500);
+      });
+
+      // Update the Y-axis dynamically
+      chart.options.scales.y.min = minY - 200;
+      chart.options.scales.y.max = maxY + 200;
+
+      chart.update();
+    });
+
+    socket.on('stockUpdate', (data) => {
+      console.log('📡 Real-time update received:', data);
+      addDataPoint(data);
+    });
+
+    socket.on('disconnect', () => {
+      console.warn('❌ Disconnected from WebSocket server');
+    });
+  </script>

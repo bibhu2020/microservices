@@ -1,0 +1,47 @@
+trigger:
+  branches:
+    include:
+      - monitoring
+  paths:
+    include:
+      - _nonaks/oauthapi/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '20.x'
+  buildDir: 'build'
+  sourceDir: '_nonaks/oauthapi'
+  artifactName: 'oauthapi'
+  artifactPath: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+
+steps:
+- task: UseNode@1
+  inputs:
+    version: '$(nodeVersion)'
+    checkLatest: true
+  displayName: 'Set up Node.js'
+
+- script: |
+    mkdir -p $(buildDir)
+    cp -r $(sourceDir)/* $(buildDir)
+  displayName: 'Create build directory and copy source files'
+
+- script: |
+    cd $(buildDir)
+    npm install
+  displayName: 'Install dependencies'
+
+- script: |
+    # Ensure we are in the build directory to zip contents correctly
+    cd $(buildDir)
+    zip -r $(Build.ArtifactStagingDirectory)/$(artifactName).zip . -x '*.yaml'
+  displayName: 'Create deployment zip'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+    ArtifactName: '$(artifactName)'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact'

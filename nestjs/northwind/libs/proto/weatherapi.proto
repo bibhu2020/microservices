@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package weatherapi;
+
+service WeatherApiService {
+  rpc GetCurrentWeather (WeatherRequest) returns (WeatherResponse);
+  rpc GetForecast (ForecastRequest) returns (ForecastResponse);
+}
+
+message WeatherRequest {
+  string city = 1;
+  string country = 2;
+}
+
+message WeatherResponse {
+  string city = 1;
+  string country = 2;
+  string temperature = 3;
+  string condition = 4;
+  string humidity = 5;
+  string windSpeed = 6;
+}
+
+message ForecastRequest {
+  string city = 1;
+  string country = 2;
+  int32 days = 3;
+}
+
+message Forecast {
+  string date = 1;
+  string temperature = 2;
+  string condition = 3;
+}
+
+message ForecastResponse {
+  repeated Forecast forecasts = 1;
+}

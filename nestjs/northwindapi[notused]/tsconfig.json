@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@app/applogger": [
+        "src/libs/applogger/src"
+      ],
+      "@app/applogger/*": [
+        "src/libs/applogger/src/*"
+      ],
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@seed/*": [
+        "src/database/seed/*"
+      ]
+    },
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

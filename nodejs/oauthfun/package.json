@@ -1,0 +1,22 @@
+{
+  "name": "oauthfun",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/functions/**/*.js",
+  "type": "module",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/identity": "^4.4.1",
+    "@azure/service-bus": "^7.9.5",
+    "applicationinsights": "^3.3.0",
+    "axios": "^1.7.6",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.x"
+  }
+}

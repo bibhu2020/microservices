@@ -1,0 +1,20 @@
+{
+    "subscription_id": "0a5cfe5c-0982-401a-85f7-0d132c1cb536",
+    "resource_groups": [
+        {
+            "resource_group": "azure-staging-redesign-RG",
+            "tags": [
+                {
+                    "key": "Environment",
+                    "value": "staging",
+                    "overwrite": "Y"
+                },
+                {
+                    "key": "Owner",
+                    "value": "Erin Fairchild",
+                    "overwrite": "N"
+                }
+            ]
+        }
+    ]
+}

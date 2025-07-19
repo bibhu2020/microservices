@@ -1,0 +1,6 @@
+# set_openai_env.sh
+
+export AZURE_OPENAI_ENDPOINT="https://oauthopenai.openai.azure.com/"
+export AZURE_OPENAI_API_VERSION="2024-02-01"
+export AZURE_OPENAI_API_KEY=
+export AZURE_OPENAI_DEPLOYMENT_NAME="gpt-4o"

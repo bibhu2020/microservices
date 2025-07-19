@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.application.name }}-app"
+  namespace: "{{ .Values.application.namespace }}"
+spec:
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.application.name }}-app"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.application.name }}-app"
+    spec:
+      automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cloudblogs
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: "{{ .Values.application.name }}-app"
+              topologyKey: "kubernetes.io/hostname"
+      # serviceAccountName: "{{ .Values.application.name }}-sa"
+      containers:
+        - name: "{{ .Values.application.name }}-app"
+          image: "{{ .Values.application.repository }}:{{ .Values.application.tag }}"
+          #pullPolicy: "{{ .Values.application.pullPolicy }}"
+        #   livenessProbe:
+        #     httpGet:
+        #       path: /api/
+        #       port: 8080
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 30
+        #     timeoutSeconds: 5
+        #   readinessProbe:
+        #     httpGet:
+        #       path: /api/
+        #       port: 8080
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 30
+        #     timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.application.name }}-srv" 
+  namespace: "{{ .Values.application.namespace }}" 
+spec:
+  selector:
+    app: "{{ .Values.application.name }}-app" 
+  ports:
+  - protocol: TCP
+    name: http
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Values.application.name }}-https-ingress" 
+  namespace: "{{ .Values.application.namespace }}" 
+  annotations:
+    #nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    #nginx.ingress.kubernetes.io/limit-connections: "5"
+    #nginx.ingress.kubernetes.io/limit-rps: "20"
+spec:
+  ingressClassName: nginx
+  # tls:
+  # - hosts:
+  #   - {{ .Values.application.hostHeader }}
+  #   secretName: {{ .Values.application.name }}-tls-secret
+  rules:
+    - host: "{{ .Values.application.hostHeader }}" 
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: "{{ .Values.application.name }}-srv" 
+                port:
+                  number: {{ .Values.service.port }}
+            path: /
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: "{{ .Values.application.name }}-autoscaler"
+  namespace: "{{ .Values.application.namespace }}" 
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: "{{ .Values.application.name }}"
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}

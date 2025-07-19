@@ -1,0 +1,18 @@
+
+<!-- Text at the top -->
+<div class="text top-text">
+    Microsoft Blogging Websites
+</div>
+
+<!-- Container for the PNG image -->
+<div class="image-container">
+    <img src="/img/microsoftlogo.png" alt="Microsoft Logo">
+</div>
+
+<div class="text bottom-text2">
+    <% if(parseInt(process.env.APP_STATUS || 200) != 200) { %>
+        <font color="red"><%= data %></font>
+    <% } else { %>
+        <font color="green"><%= data %></font>
+    <% } %>
+</div>

@@ -1,0 +1,31 @@
+# Environment variables for the Web App Server
+PORT=8080                                                       # Port for the Web App Server
+NODE_ENV=development                                            # Node environment
+SESSION_SECRET=                                                 # Encryption key for the session
+REDIRECT_URI=http://localhost:8080/auth/callback                # Redirect URI for the Web App Server. This is where you read the auth code in the login process.
+
+# My REST API Parameters
+API_KEY=                                                        # API Key is used by the Web App to make call to API. It can alternatively use the Bearer Token Also.
+API_URI=http://localhost:8081                                   # URI of the Rest API Server
+
+# MY Generative API Parameters (optional if you do not want to use the Generative API)
+GEN_API_URI=http://localhost:8082                               # URI of the Generative API Server
+
+# Azure AD Configuration for the Web Api Server (Mandatory) - Rest API uses Azure AD for authorizing the incoming requests
+AZURE_TENANT_ID=                                                # Azure Tenant ID of Bibhu Personal Tenant
+AZURE_CLIENT_ID=                                                # Web App in Bibhu Personal Tenant (oauthapp)
+AZURE_CLIENT_SECRET=                                            # Optional if you are using FIC. Expires on 2025-02-10
+AZURE_API_CLIENT_ID=                                            # API App in Bibhu Personal Tenant (oauthapi) 
+AZURE_SPA_CLIENT_ID=                                            # SPA App in Bibhu Personal Tenant (oauthspa)   
+MANAGED_IDENTITY_CLIENT_ID=                                     # It's from MS corp Tenant
+
+# Azure Resource that the App is going to Read as part of Demo (Mandatory for the demo) 
+KEY_VAULT_NAME=devops-base-kv
+
+# App Isnight Monitoring Configuration (optional if you do not want to monitor the app)
+APPINSIGHTS_CONNECTION_STRING=
+
+# Redis Cache Configs
+AZURE_CACHE_FOR_REDIS_HOST_NAME=
+REDIS_SERVICE_PRINCIPAL_ID=
+USE_CACHE=true

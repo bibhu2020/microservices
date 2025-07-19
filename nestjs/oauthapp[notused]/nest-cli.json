@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/oauthapp/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/oauthapp/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/oauthapp",
+  "projects": {
+    "oauthapi": {
+      "type": "application",
+      "root": "apps/oauthapi",
+      "entryFile": "main",
+      "sourceRoot": "apps/oauthapi/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/oauthapi/tsconfig.app.json"
+      }
+    },
+    "oauthapp": {
+      "type": "application",
+      "root": "apps/oauthapp",
+      "entryFile": "main",
+      "sourceRoot": "apps/oauthapp/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/oauthapp/tsconfig.app.json"
+      }
+    }
+  }
+}

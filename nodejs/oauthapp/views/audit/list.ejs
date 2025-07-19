@@ -1,0 +1,181 @@
+<div class="w-full bg-white p-8 rounded shadow">
+    <h2 class="text-xl font-bold mb-5">Azure Audit List</h2>
+    <input type="text" id="searchInput" class="block w-full p-2 mb-4 border rounded" placeholder="Search...">
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white text-xs">
+            <thead class="sticky top-0 bg-white">
+                <tr>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="subscriptionName">Subscription Name <span class="sort-icon"></span></th>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="resourceType">Resource Type <span class="sort-icon"></span></th>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="actionBy">Action By <span class="sort-icon"></span></th>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="action">Action <span class="sort-icon"></span></th>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="actionOn">Action On <span class="sort-icon"></span></th>
+                    <th class="py-2 px-4 border-b text-left border-r cursor-pointer" data-column="status">Status <span class="sort-icon"></span></th>
+                </tr>
+            </thead>
+            <tbody id="dataTable">
+                <!-- Data rows will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4 flex justify-between items-center">
+        <a href="#" id="prevPage" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</a>
+        <span id="pageInfo" class="mx-2"></span>
+        <a href="#" id="nextPage" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Next</a>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-3/4 md:w-1/2">
+        <h3 class="text-lg font-bold mb-4 text-blue-600">Record Details</h3>
+        <div id="modalContent" class="text-sm space-y-2">
+            <!-- Modal content will be inserted here by JavaScript -->
+        </div>
+        <button id="closeModal" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
+    </div>
+</div>
+
+<script>
+    const data = <%- JSON.stringify(data) %>;
+    const subscriptions = <%- JSON.stringify(subscriptions) %>;
+
+    const dataTable = document.getElementById('dataTable');
+    const searchInput = document.getElementById('searchInput');
+    const prevPageButton = document.getElementById('prevPage');
+    const nextPageButton = document.getElementById('nextPage');
+    const pageInfo = document.getElementById('pageInfo');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
+    const tableHeaders = document.querySelectorAll('th[data-column]');
+
+    let currentPage = 1;
+    const recordsPerPage = 10;
+    let filteredData = data.map(item => ({
+        ...item,
+        subscriptionName: subscriptions.find(sub => sub.id.toLowerCase() === item.subscriptionId.toLowerCase())?.name || item.subscriptionId
+    })); // Initialize filteredData with the entire dataset and include subscriptionName
+    let sortColumn = null;
+    let sortOrder = 'asc';
+
+    function renderTable(data, page = 1) {
+        dataTable.innerHTML = '';
+        const start = (page - 1) * recordsPerPage;
+        const end = start + recordsPerPage;
+        const paginatedData = data.slice(start, end);
+
+        paginatedData.forEach(item => {
+            const actionParts = item.action.split('/');
+            const actionLastPart = actionParts[actionParts.length - 1];
+            const actionOnDate = new Date(item.actionOn);
+            const formattedDate = actionOnDate.toLocaleString();
+
+            const row = document.createElement('tr');
+            row.classList.add('cursor-pointer', 'hover:bg-gray-200');
+            row.addEventListener('click', () => openModal(item));
+            row.innerHTML = `
+                <td class="py-2 px-4 border-b border-r table-cell">${item.subscriptionName}</td>
+                <td class="py-2 px-4 border-b border-r table-cell">${item.resourceType}</td>
+                <td class="py-2 px-4 border-b border-r table-cell">${item.actionBy}</td>
+                <td class="py-2 px-4 border-b border-r table-cell">${actionLastPart}</td>
+                <td class="py-2 px-4 border-b border-r table-cell">${formattedDate}</td>
+                <td class="py-2 px-4 border-b border-r table-cell">${item.status}</td>
+            `;
+            dataTable.appendChild(row);
+        });
+
+        pageInfo.textContent = `Page ${page} of ${Math.ceil(data.length / recordsPerPage)}`;
+    }
+
+    function filterData(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        filteredData = data.map(item => ({
+            ...item,
+            subscriptionName: subscriptions.find(sub => sub.id.toLowerCase() === item.subscriptionId.toLowerCase())?.name || item.subscriptionId
+        })).filter(item => {
+            return Object.values(item).some(value =>
+                value.toString().toLowerCase().includes(searchTerm)
+            ) || item.subscriptionName.toLowerCase().includes(searchTerm);
+        });
+        currentPage = 1;
+        renderTable(filteredData, currentPage);
+    }
+
+    function sortData(column) {
+        sortOrder = (sortColumn === column && sortOrder === 'asc') ? 'desc' : 'asc';
+        sortColumn = column;
+
+        filteredData.sort((a, b) => {
+            const aValue = a[column] ? a[column].toString().toLowerCase() : '';
+            const bValue = b[column] ? b[column].toString().toLowerCase() : '';
+
+            if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        updateSortIcons();
+        renderTable(filteredData, currentPage);
+    }
+
+    function updateSortIcons() {
+        tableHeaders.forEach(header => {
+            const icon = header.querySelector('.sort-icon');
+            const column = header.getAttribute('data-column');
+            if (column === sortColumn) {
+                icon.textContent = sortOrder === 'asc' ? '▲' : '▼';
+            } else {
+                icon.textContent = '';
+            }
+        });
+    }
+
+    function openModal(item) {
+        modalContent.innerHTML = `
+            <p><strong>Subscription ID:</strong> ${item.subscriptionId}</p>
+            <p><strong>Resource ID:</strong> <span class="break-words">${item.resourceId}</span></p>
+            <p><strong>Resource Type:</strong> ${item.resourceType}</p>
+            <p><strong>Action By:</strong> ${item.actionBy}</p>
+            <p><strong>Action UPN:</strong> ${item.actionUPN}</p>
+            <p><strong>Action:</strong> ${item.action}</p>
+            <p><strong>Action On:</strong> ${new Date(item.actionOn).toLocaleString()}</p>
+            <p><strong>Client IP:</strong> ${item.clientIP}</p>
+            <p><strong>Status:</strong> ${item.status}</p>
+        `;
+        modal.classList.remove('hidden');
+    }
+
+    closeModal.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    searchInput.addEventListener('input', filterData);
+
+    prevPageButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(filteredData, currentPage);
+        }
+    });
+
+    nextPageButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(filteredData, currentPage);
+        }
+    });
+
+    tableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-column');
+            sortData(column);
+        });
+    });
+
+    // Initial render
+    renderTable(filteredData, currentPage);
+</script>

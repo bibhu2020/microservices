@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.application.name }}-app"
+  namespace: "{{ .Values.application.namespace }}"
+spec:
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.application.name }}-app"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.application.name }}-app"
+    spec:
+      automountServiceAccountToken: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cloudblogs
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: "{{ .Values.application.name }}-app"
+              topologyKey: "kubernetes.io/hostname"
+      # serviceAccountName: "{{ .Values.application.name }}-sa"
+      containers:
+        - name: "{{ .Values.application.name }}-app"
+          image: "{{ .Values.application.repository }}:{{ .Values.application.tag }}"
+          #pullPolicy: "{{ .Values.application.pullPolicy }}"
+        #   livenessProbe:
+        #     httpGet:
+        #       path: /api/
+        #       port: 8080
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 30
+        #     timeoutSeconds: 5
+        #   readinessProbe:
+        #     httpGet:
+        #       path: /api/
+        #       port: 8080
+        #     initialDelaySeconds: 30
+        #     periodSeconds: 30
+        #     timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"
+---

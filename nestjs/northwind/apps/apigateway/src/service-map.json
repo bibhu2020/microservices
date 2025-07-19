@@ -1,0 +1,7 @@
+{
+    "/proxy/customers": "http://localhost:3002",
+    "/oauth": "http://localhost:3004",
+    "/weather": "http://localhost:3005",
+    "default": "http://localhost:3000"
+  }
+  

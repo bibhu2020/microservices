@@ -1,0 +1,100 @@
+<div class="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
+    <h2 class="text-2xl font-bold mb-6 text-center">Test Email API</h2>
+    <form id="emailForm" class="space-y-4">
+        
+        <!-- Email From -->
+        <div>
+            <label for="emailFrom" class="block text-gray-700 font-medium">Email From</label>
+            <input type="email" id="emailFrom" name="emailFrom" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required value="contentcomposer@gdcwebopsservice.microsoft.com">
+        </div>
+
+        <!-- Email To -->
+        <div>
+            <label for="emailTo" class="block text-gray-700 font-medium">Email To</label>
+            <input type="email" id="emailTo" name="emailTo" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required value="v-bimishra@microsoft.com">
+        </div>
+
+        <!-- Email Subject -->
+        <div>
+            <label for="emailSubject" class="block text-gray-700 font-medium">Subject</label>
+            <input type="text" id="emailSubject" name="emailSubject" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required value="Testing API">
+        </div>
+
+        <!-- Email Body -->
+        <div>
+            <label for="emailBody" class="block text-gray-700 font-medium">Body</label>
+            <textarea id="emailBody" name="emailBody" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required >This email is generated from email api testing.</textarea>
+        </div>
+
+        <!-- Submit Button with Spinner -->
+        <div class="relative">
+            <button type="submit" id="submitButton" class="w-full bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center">
+                Send Email
+                <!-- Spinner (Hidden by default) -->
+                <svg id="buttonSpinner" class="hidden absolute h-5 w-5 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+            </button>
+        </div>
+
+    </form>
+
+    <!-- Response Message -->
+    <div id="responseMessage" class="mt-4 text-center"></div>
+        
+</div>
+
+<script>
+   document.getElementById('emailForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const formDataObj = Object.fromEntries(formData.entries());
+        // Debugging: Log form data
+        // for (let [key, value] of formData.entries()) {
+        //     console.log(`${key}: ${value}`);
+        // }
+
+        try {
+
+            const responseMessage = document.getElementById('responseMessage');
+            const submitButton = document.getElementById('submitButton');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+
+            // Disable the submit button and show the spinner
+            submitButton.disabled = true;
+            buttonSpinner.classList.remove('hidden');
+
+            // Clear previous messages
+            responseMessage.textContent = '';
+
+            const response = await fetch('/azure/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formDataObj),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                responseMessage.textContent = 'Email queued successfully!';
+                responseMessage.classList.add('text-green-500');
+            } else {
+                responseMessage.textContent = `Failed to send email: ${result.error}`;
+                responseMessage.classList.add('text-red-500');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.textContent = 'An error occurred while sending the email.';
+            responseMessage.classList.add('text-red-500');
+        } finally {
+            // Re-enable the submit button and hide the spinner
+            submitButton.disabled = false;
+            buttonSpinner.classList.add('hidden');
+        }
+    });
+</script>

@@ -1,0 +1,130 @@
+<!-- Desktop Header -->
+<header class="w-full items-center bg-white py-2 px-6 hidden sm:flex">
+    <div class="w-1/2">
+        <!-- Countdown Timer -->
+        <!-- <% if (userName) { %> -->
+        <div class="countdown-timer">
+          Token expires in: <span id="countdown">--:--:--</span>
+        </div>
+        <!-- <% } %> -->
+    </div>
+
+    <!-- Notification Marquee -->
+    <div class="w-full bg-yellow-100 py-2 px-4 text-center">
+        <marquee behavior="scroll" direction="left" class="text-yellow-800 font-semibold">
+            <div id="notification">
+            🚀 Welcome to the OAuth App! Stay tuned for updates and new features. 🚀
+            </div>
+        </marquee>
+    </div>
+
+    <div x-data="{ isOpen: false }" class="relative w-1/2 flex justify-end">
+        <% if (userName) { %>
+        <button @click="isOpen = !isOpen" class="realtive z-10 w-12 h-12 rounded-full overflow-hidden border-4 border-gray-400 hover:border-gray-300 focus:border-gray-300 focus:outline-none">
+          <img src="/photos/<%= userId %>.jpg" alt="User Photo">
+        </button>
+        <% } else { %>
+        <button @click="isOpen = !isOpen" class="realtive z-10 w-12 h-12 rounded-full overflow-hidden border-4 border-gray-400 hover:border-gray-300 focus:border-gray-300 focus:outline-none">
+            <img src="/images/profile.png" alt="User Photo">
+        </button>
+        <% } %>
+        <button x-show="isOpen" @click="isOpen = false" class="h-full w-full fixed inset-0 cursor-default"></button>
+        <div x-show="isOpen" class="absolute w-32 bg-white rounded-lg shadow-lg py-2 mt-16">
+            <% if (userName) { %>
+                <a href="/auth/profile" class="block px-4 py-2 account-link hover:text-white"><%= userName %></a>
+                <a href="/auth/logout" class="block px-4 py-2 account-link hover:text-white">Sign Out</a>
+            <% } else { %>
+                <a href="/auth/login" class="block px-4 py-2 account-link hover:text-white">Sign In</a>
+            <% } %>
+        </div>
+  </div>
+</header>
+
+<!-- Mobile Header & Nav -->
+<header x-data="{ isOpen: false }" class="w-full bg-sidebar py-5 px-6 sm:hidden">
+  <div class="flex items-center justify-between">
+      <a href="index.html" class="text-white text-3xl font-semibold uppercase hover:text-gray-300">Oauth</a>
+      <button @click="isOpen = !isOpen" class="text-white text-3xl focus:outline-none">
+          <i x-show="!isOpen" class="fas fa-bars"></i>
+          <i x-show="isOpen" class="fas fa-times"></i>
+      </button>
+  </div>
+
+  <%- include('./mobilenav') %>
+
+  
+  <!-- <button class="w-full bg-white cta-btn font-semibold py-2 mt-5 rounded-br-lg rounded-bl-lg rounded-tr-lg shadow-lg hover:shadow-xl hover:bg-gray-300 flex items-center justify-center">
+      <i class="fas fa-plus mr-3"></i> New Report
+  </button> -->
+</header>
+
+<script>
+// Function to decode a JWT token
+function decodeJWT(token) {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+}
+
+// Function to start the countdown
+function startCountdown(expiryTime) {
+    const countdownElement = document.getElementById('countdown');
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = expiryTime * 1000 - now; // Convert expiryTime from seconds to milliseconds
+
+        if (distance < 0) {
+            countdownElement.innerHTML = "EXPIRED";
+            clearInterval(intervalId);
+            return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        countdownElement.innerHTML = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Update the countdown every second
+    //**const intervalId = setInterval(updateCountdown, 1000);
+    //**updateCountdown(); // Initial call to display immediately
+}
+
+// Function to refresh the expiry time
+function refreshExpiryTime() {
+    const accessToken = getCookie('accessToken');
+
+    if (accessToken) {
+        const decodedToken = decodeJWT(accessToken);
+        const expiryTime = decodedToken.exp;
+        startCountdown(expiryTime);
+    } else {
+        console.error("Access token not found in cookies");
+        document.getElementById('countdown').innerHTML = "N/A";
+    }
+}
+
+// Refresh the expiry time every 5 seconds
+//**setInterval(refreshExpiryTime, 5000);
+//**refreshExpiryTime(); // Initial call to set up countdown immediately
+
+
+</script>
+
+<script src="http://localhost:3002/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const socket = io('http://localhost:3002'); // connect to NestJS server
+
+      socket.on('broadcastMessage', (data) => {
+        const container = document.getElementById('notification');
+        if(data.message && data.message.length > 0) {
+            container.innerText = data.message;
+        } else {
+            container.innerText = "🚀 Welcome to the OAuth App! Stay tuned for updates and new features. 🚀";
+        }
+        //console.log("Message received from server:", data);
+      });
+    });
+  </script>

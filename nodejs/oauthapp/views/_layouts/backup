@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth PoC</title>
+    <meta name="author" content="Bibhu Mishra">
+    <meta name="description" content="">
+
+    <!-- Tailwind -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
+        .font-family-karla { font-family: karla; }
+        .bg-sidebar { background: #3d68ff; }
+        .cta-btn { color: #3d68ff; }
+        .upgrade-btn { background: #1947ee; }
+        .upgrade-btn:hover { background: #0038fd; }
+        .active-nav-link { background: #1947ee; }
+        .nav-item:hover { background: #1947ee; }
+        .account-link:hover { background: #3d68ff; }
+        .submenu { display: none; }
+        .submenu-active { display: block; }
+        .nav-item-active { background-color: rgba(255, 255, 255, 0.2); }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap; /* To wrap long lines */
+            word-wrap: break-word; /* To break long words */
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px; /* Add padding */
+            border-radius: 10px; /* Rounded corners */
+        }
+        @media (min-width: 768px) {
+            .modal {
+                width: 25%;
+                height: 100%;
+            }
+        }
+        .modal-header {
+            background: #3d68ff;
+            color: white;
+            padding: 10px;
+            border-top-left-radius: 10px; /* Rounded corners for header */
+            border-top-right-radius: 10px; /* Rounded corners for header */
+        }
+        .modal-content {
+            padding: 0;
+            height: calc(100% - 40px); /* Adjust height to fill the modal */
+            border-bottom-left-radius: 10px; /* Rounded corners for content */
+            border-bottom-right-radius: 10px; /* Rounded corners for content */
+        }
+        .close-btn {
+            float: right;
+            cursor: pointer;
+        }
+        .modal-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-family-karla flex">
+
+    <%- include('../_partials/leftnav') %>
+
+    <div class="w-full flex flex-col h-screen overflow-y-hidden">
+        
+        <%- include('../_partials/header') %>
+
+        <div class="w-full overflow-x-hidden border-t flex flex-col">
+            <main class="w-full flex-grow p-6">
+                <%- body %>
+            </main>
+    
+            <%- include('../_partials/footer') %>
+        </div>
+        
+    </div>
+
+    <!-- Modal Popup -->
+    <div class="modal" id="infoModal">
+        <div class="modal-header">
+            <span class="close-btn" onclick="toggleModal()">&times;</span>
+            Information
+        </div>
+        <div class="modal-content">
+            <iframe src="https://copilotstudio.microsoft.com/environments/Default-95595fde-7f04-4030-ace9-d08cf1e81bdc/bots/crb00_copilot/webchat?__version__=2"></iframe>
+        </div>
+    </div>
+
+    <!-- AlpineJS -->
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
+    <!-- ChartJS -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha256-R4pqcOYV8lt7snxMQO/HSbVCFRPMdrhAFMH+vr9giYI=" crossorigin="anonymous"></script> -->
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    
+        function isTokenExpired(token) {
+            if (!token) return false; //if token is not existing, do nothing
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const now = Math.floor(Date.now() / 1000);
+            return payload.exp < now;
+            //return true;
+        }
+    
+        async function refreshTokenRequest() {
+            try {
+                const refreshToken = getCookie('refreshToken'); // Assuming getCookie is a function that retrieves the refresh token from cookies
+
+                console.log("test ur rrefresh token: " + refreshToken);
+
+                if (!refreshToken) {
+                    console.error('No refresh token found.');
+                    return;
+                }
+
+                const response = await fetch('/auth/refresh-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken }) // Send the refresh token in the body
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    console.log('Token refreshed successfully.');
+                    location.reload();
+                } else {
+                    console.error('Failed to refresh token.', data.message);
+                }
+            } catch (error) {
+                console.error('Error refreshing token:', error);
+            }
+        }
+    
+        function checkAndRefreshToken() {
+            const accessToken = getCookie('accessToken');
+            const refreshToken = getCookie('refreshToken');
+
+    
+            console.log('Access Token:', accessToken);
+            console.log('Refresh Token:', refreshToken);
+    
+            if (isTokenExpired(accessToken)) {
+                if (confirm('Your session is about to expire. Would you like to refresh your session?')) {
+                    refreshTokenRequest();
+                }
+            }
+        }
+    
+        //checkAndRefreshToken();
+
+        // Interval in milliseconds (15 minutes)
+        const interval = 15 * 60 * 1000;
+
+        // Set up the interval
+        //**setInterval(checkAndRefreshToken, interval);
+
+        function toggleModal() {
+            const modal = document.getElementById('infoModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

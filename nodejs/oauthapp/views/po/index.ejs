@@ -1,0 +1,171 @@
+<div class="container mx-auto mt-10">
+    <h1 class="text-2xl font-bold mb-5">Submit Purchase Order</h1>
+    <form id="purchaseOrderForm">
+        <div class="flex flex-wrap -mx-2 mb-4">
+            <div class="w-full lg:w-1/2 px-2 mb-4 lg:mb-0">
+                <label for="vendorName" class="block text-gray-700">Vendor Name</label>
+                <select id="vendorName" class="block w-full mt-1" required>
+                    <option value="vendor1">Vendor 1</option>
+                    <option value="vendor2">Vendor 2</option>
+                    <option value="vendor3">Vendor 3</option>
+                </select>
+            </div>
+            <div class="w-full lg:w-1/2 px-2">
+                <label for="shippingAddress" class="block text-gray-700">Shipping Address</label>
+                <textarea id="shippingAddress" class="block w-full mt-1" required></textarea>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="item" class="block text-gray-700">Select Item</label>
+            <select id="item" class="block w-full mt-1">
+                <option value="item1">Item 1</option>
+                <option value="item2">Item 2</option>
+                <option value="item3">Item 3</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="quantity" class="block text-gray-700">Quantity</label>
+            <input type="number" id="quantity" class="block w-full mt-1" min="1" value="1">
+        </div>
+        <input type="hidden" id="submitter" value="<%= userName %>">
+        <input type="hidden" id="poId">
+        <button type="button" onclick="addItem()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Item</button>
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-2">Line Items</h2>
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2">Item</th>
+                        <th class="py-2">Quantity</th>
+                        <th class="py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="lineItems">
+                    <!-- Line items will be added here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-6">
+            <button type="submit" id="submitButton" class="bg-green-500 text-white px-4 py-2 rounded">Submit Purchase Order</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const lineItems = [];
+
+    function addItem() {
+        const itemSelect = document.getElementById('item');
+        const quantityInput = document.getElementById('quantity');
+        const item = itemSelect.value;
+        const quantity = quantityInput.value;
+
+        if (item && quantity > 0) {
+            lineItems.push({ item, quantity });
+            renderLineItems();
+        }
+    }
+
+    function removeItem(index) {
+        lineItems.splice(index, 1);
+        renderLineItems();
+    }
+
+    function renderLineItems() {
+        const lineItemsTable = document.getElementById('lineItems');
+        lineItemsTable.innerHTML = '';
+
+        lineItems.forEach((lineItem, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-2">${lineItem.item}</td>
+                <td class="py-2">${lineItem.quantity}</td>
+                <td class="py-2">
+                    <button type="button" onclick="removeItem(${index})" class="bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+                </td>
+            `;
+            lineItemsTable.appendChild(row);
+        });
+    }
+
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            poId: params.get('id'),
+            vendorName: params.get('vendorName'),
+            shippingAddress: params.get('shippingAddress'),
+            submitter: params.get('submitter'),
+            lineItems: JSON.parse(params.get('lineItems') || '[]')
+        };
+    }
+
+    function populateForm() {
+        const { poId, vendorName, shippingAddress, submitter, lineItems: items } = getQueryParams();
+
+        if (poId) {
+            document.getElementById('poId').value = poId;
+            document.getElementById('submitButton').textContent = 'Update Purchase Order';
+            document.getElementById('vendorName').disabled = true; // Disable vendor dropdown if editing
+        }
+        if (vendorName) document.getElementById('vendorName').value = vendorName;
+        if (shippingAddress) document.getElementById('shippingAddress').value = shippingAddress;
+        if (submitter) document.getElementById('submitter').value = submitter;
+        if (items.length > 0) {
+            items.forEach(item => lineItems.push(item));
+            renderLineItems();
+        }
+    }
+
+    document.getElementById('purchaseOrderForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const poId = document.getElementById('poId').value;
+        const vendorName = document.getElementById('vendorName').value;
+        const shippingAddress = document.getElementById('shippingAddress').value;
+        const submitter = document.getElementById('submitter').value;
+
+        const formData = {
+            poId,
+            vendorName,
+            shippingAddress,
+            lineItems,
+            submitter
+        };
+
+        console.log('Submitting purchase order:', JSON.stringify(formData));
+
+        const apiURI = '<%= apiURI %>';
+
+        const url = poId ? `${apiURI}/unauthorized/api/po/put/${poId}/${vendorName}` : `${apiURI}/unauthorized/api/po/create`;
+        const method = poId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(poId ? 'Purchase order updated successfully!' : 'Purchase order submitted successfully!');
+                lineItems.length = 0;
+                renderLineItems();
+                document.getElementById('purchaseOrderForm').reset();
+                if (poId) {
+                    window.location.href = 'list'; // Redirect to the list page if editing
+                }
+            } else {
+                alert('Failed to submit purchase order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting purchase order:', error);
+            alert('An error occurred while submitting the purchase order.');
+        });
+    });
+
+    // Populate form fields if query parameters exist
+    document.addEventListener('DOMContentLoaded', populateForm);
+</script>

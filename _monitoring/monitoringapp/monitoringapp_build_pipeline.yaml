@@ -1,0 +1,122 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:
+      include:
+      - monitoring
+  paths:
+    include:
+      - _monitoring/monitoringapp/
+      
+pool:
+  name: Azure Pipelines
+  vmImage: ubuntu-latest
+
+steps:
+  - task: CredScan@3
+    inputs:
+      outputFormat: 'csv'
+      suppressAsError: true
+      verboseOutput: true
+
+  - task: CodeQL3000Init@0
+    displayName: Initialize CodeQL
+
+  - task: npmAuthenticate@0
+    displayName: 'NPM Authenticate'
+    inputs:
+      workingFile: ./_monitoring/monitoringapp/.npmrc
+  - bash: |
+      cp ./_monitoring/monitoringapp/.npmrc ~/.npmrc
+
+  # - task: NodeTool@0
+  #   inputs:
+  #     versionSource: 'spec'
+  #     versionSpec: '20.11.0'
+  #   displayName: 'Install Node.js'
+
+  # - script: |
+  #     npm install -g npm@10.3.0
+  #   displayName: 'Update npm'
+
+  # - script: |
+  #     cd ./_monitoring/monitoringapp
+  #     pwd 
+  #     npm install
+  #     ls -l 
+  #   displayName: 'Install npm packages'
+
+  # - script: |
+  #     cd ./_monitoring/monitoringapp
+  #     npm run build
+  #   displayName: 'Bundle the App'
+
+
+  - task: PowerShell@2
+    displayName: Setting up the ACR NAME and Repository name
+    inputs:
+      targetType: 'inline'
+      script: |
+        $branch = "$(Build.SourceBranchName)"
+        if($branch -eq "preprod")
+        {
+          Write-Host "##vso[task.setvariable variable=container-registry-name]aksocppeacr.azurecr.io"
+          Write-Host "##vso[task.setvariable variable=repository-name]onecloud-monitoringapp-ppe"
+          Write-Host "##vso[task.setvariable variable=env-name]ppe"
+        }
+        else
+        {
+          Write-Host "##vso[task.setvariable variable=container-registry-name]aksocstgacr.azurecr.io"
+          Write-Host "##vso[task.setvariable variable=repository-name]onecloud-monitoringapp-stg"
+          Write-Host "##vso[task.setvariable variable=env-name]stg"
+        }
+        if($branch -eq "main")
+        {
+          Write-Host "##vso[task.setvariable variable=container-registry-name]aksocprdacr.azurecr.io"
+          Write-Host "##vso[task.setvariable variable=repository-name]onecloud-monitoringapp-prd"
+          Write-Host "##vso[task.setvariable variable=env-name]prd"
+        }
+
+  - task: AzureCLI@2
+    displayName: 'Log in to ACR'
+    inputs:
+      azureSubscription: 'OneCloud-Blogs-Web-App-Connection'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az acr login --name $(container-registry-name)'
+
+  - task: Bash@3
+    displayName: Docker Build and push to ACR
+    inputs:
+      targetType: 'inline'
+      script: |
+        docker build -f ./_monitoring/monitoringapp/Dockerfile ./_monitoring/monitoringapp/ -t $(container-registry-name)/$(repository-name):$(Image_Tag)
+        docker push $(container-registry-name)/$(repository-name):$(Image_Tag)
+
+  - task: PowerShell@2
+    displayName: Helm packaging based on the environment
+    inputs:
+      targetType: 'inline'
+      script: |
+        $branch = "$(Build.SourceBranchName)"
+        $app_version='$(Build.BuildNumber)'
+
+        write-host "setting image reference and env name and acr name in helm file"
+        $helm_content=get-content -Path ./_monitoring/monitoringapp/monitoringapp/values.yaml
+        $final_helm_content=$helm_content -replace 'repository_name','$(repository-name)' -replace 'ENV_NAME','$(env-name)' -replace 'ACR_NAME','$(container-registry-name)' -replace 'tag_name','$(Image_Tag)' | Set-Content -Path ./_monitoring/monitoringapp/monitoringapp/values.yaml
+        write-host "image reference and env name and acr name in helm file is updated successfuslly"
+
+        write-host "setting app version in helm file"
+        write-host $app_version
+        $chart_content=get-content -Path ./_monitoring/monitoringapp/monitoringapp/Chart.yaml
+        $final_chart_content=$chart_content -replace 'build_version',$app_version -replace 'chart_name', '$(repository-name)' | Set-Content -Path ./_monitoring/monitoringapp/monitoringapp/Chart.yaml
+        write-host "image app version in helm file is updated successfully"
+
+        helm package ./_monitoring/monitoringapp/monitoringapp/
+        helm push $(Build.SourcesDirectory)/*.tgz oci://$(container-registry-name)/
+
+  - task: CodeQL3000Finalize@0
+    displayName: Finalize CodeQL

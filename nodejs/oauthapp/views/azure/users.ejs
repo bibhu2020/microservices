@@ -1,0 +1,56 @@
+<div>
+  <!-- Hero Section -->
+  <section class="bg-white">
+    <div class="container mx-auto px-6 py-4">
+      <h2 class="text-5xl font-bold text-gray-800 text-center">Activity Directory Users 
+        <!-- <% if (data.accessMethod) { %> 
+          (<%=data.accessMethod%>) 
+        <% } %> -->
+      </h2>
+      <div class="w-full mt-4">
+        <p class="text-xl pb-3 flex items-center">
+            <i class="fas fa-list mr-3"></i> Users:
+        </p>
+        <div class="bg-white overflow-auto">
+            <table class="min-w-full bg-white text-xs"> <!-- Added text-xs for smaller font size -->
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="w-1/4 text-left py-2 px-3 uppercase font-semibold text-xs border-r whitespace-nowrap">Name</th> <!-- Updated padding and font size -->
+                        <th class="w-1/4 text-left py-2 px-3 uppercase font-semibold text-xs border-r whitespace-nowrap">Title</th> <!-- Updated padding and font size -->
+                        <th class="w-1/4 text-left py-2 px-3 uppercase font-semibold text-xs border-r whitespace-nowrap">Department</th> <!-- Updated padding and font size -->
+                        <th class="w-1/4 text-left py-2 px-3 uppercase font-semibold text-xs border-r whitespace-nowrap">Email</th> <!-- Updated padding and font size -->
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                  <% data.users.value.forEach(item => { %>
+                    <tr>
+                        <td class="w-1/4 text-left py-2 px-3 border-b border-r whitespace-nowrap"><%= item.displayName %></td> <!-- Updated padding and font size -->
+                        <td class="w-1/4 text-left py-2 px-3 border-b border-r whitespace-nowrap"><%= item.jobTitle %></td> <!-- Updated padding and font size -->
+                        <td class="w-1/4 text-left py-2 px-3 border-b border-r whitespace-nowrap"><%= item.department %></td> <!-- Updated padding and font size -->
+                        <td class="w-1/4 text-left py-2 px-3 border-b border-r whitespace-nowrap"><%= item.mail %></td> <!-- Updated padding and font size -->
+                    </tr>
+                  <% }) %>
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gray-100 text-xs"> <!-- Added text-xs for smaller font size -->
+    <div class="container mx-auto px-6 py-4">
+      <% if (data.bearerToken) { %>
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-gray-800">Authorization Bearer Token</h2> <!-- Removed text-xs as it's inherited from section -->
+        <p class="mt-4 text-gray-600"><pre><%= JSON.stringify(data.bearerToken, null, 2) %></pre></p> <!-- Removed text-xs as it's inherited from section -->
+      </div>
+      <% } %>
+      <% if (data.accessToken) { %>
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-gray-800">Access Token</h2> <!-- Removed text-xs as it's inherited from section -->
+        <p class="mt-4 text-gray-600"><pre><%= JSON.stringify(data.accessToken, null, 2) %></pre></p> <!-- Removed text-xs as it's inherited from section -->
+      </div>
+      <% } %>
+    </div>
+  </section>
+</div>

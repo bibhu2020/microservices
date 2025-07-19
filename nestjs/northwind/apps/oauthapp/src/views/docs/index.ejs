@@ -1,0 +1,39 @@
+<h1 class="text-3xl text-black pb-6">OAuth Overview</h1>
+        
+<div class="flex flex-wrap mt-6">
+    <div class="w-full lg:w-1/2 pr-0 lg:pr-2 mb-12 lg:mb-0">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">What is OAuth?</h2>
+            <p class="text-gray-700 mb-4">OAuth is an open standard for access delegation, commonly used as a way to grant websites or applications limited access to their users' information without exposing passwords. OAuth allows third-party services to exchange and access data securely.</p>
+            <p class="text-gray-700">OAuth is widely used for token-based authentication and authorization, enabling various types of applications to communicate securely.</p>
+            <img src="/images/oauth.png" alt="OAuth Diagram" class="mt-4">
+        </div>
+    </div>
+    <div class="w-full lg:w-1/2 pl-0 lg:pl-2">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">Types of OAuth Flows</h2>
+            <ul class="list-disc list-inside text-gray-700">
+                <li class="mb-4">
+                    <strong>Authorization Code Flow:</strong> 
+                    Used for server-side applications where the client can securely store a client secret.
+                    <br><img src="/images/oauth-code-flow.png" alt="Authorization Code Flow Diagram" class="mt-2">
+                </li>
+                <li class="mb-4">
+                  <strong>Client Credentials Flow:</strong> 
+                  Used for server-to-server communication where no user context is required.
+                  <br><img src="/images/oauth-client-credential-flow.png" alt="Client Credentials Flow Diagram" class="mt-2">
+              </li>
+              <li class="mb-4">
+                    <strong>Implicit Flow:</strong> 
+                    Used for client-side applications (e.g., SPAs) where the client secret cannot be stored securely.
+                    <br><img src="/images/oauth-implicit-flow.png" alt="Implicit Flow Diagram" class="mt-2">
+                </li>
+                <li class="mb-4">
+                    <strong>Password Credentials Flow:</strong> 
+                    Used for trusted applications where the resource owner shares their credentials with the client.
+                    <br><img src="/images/oauth-ropc-flow.png" alt="Password Credentials Flow Diagram" class="mt-2">
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

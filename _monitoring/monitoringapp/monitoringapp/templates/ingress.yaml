@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: '{{ .Values.application.name }}-https-ingress'
+  namespace: '{{ .Values.application.namespace }}'
+  annotations:
+    #nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    #nginx.ingress.kubernetes.io/limit-connections: "5"
+    #nginx.ingress.kubernetes.io/limit-rps: "20"
+spec:
+  ingressClassName: nginx
+  # tls:
+  # - hosts:
+  #   - {{ .Values.application.hostHeader }}
+  #   secretName: {{ .Values.application.name }}-tls-secret
+  rules:
+    - host: '{{ .Values.application.hostHeader }}'
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: '{{ .Values.application.name }}-srv'
+                port:
+                  number: {{ .Values.service.port }}
+            path: /

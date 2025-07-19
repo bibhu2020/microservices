@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - monitoring
+  paths:
+    include:
+      - pocs/oauthapp/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '20.x'
+  buildDir: 'build'
+  sourceDir: 'pocs/oauthapp'
+  artifactName: 'oauthapp'
+  artifactPath: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+
+steps:
+- task: CodeQL3000Init@0
+- task: UseNode@1
+  inputs:
+    version: '$(nodeVersion)'
+    checkLatest: true
+  displayName: 'Set up Node.js'
+
+- script: |
+    mkdir -p $(buildDir)
+    cp -r $(sourceDir)/* $(buildDir)
+  displayName: 'Create build directory and copy source files'
+
+- script: |
+    cd $(buildDir)
+    npm install
+  displayName: 'Install dependencies'
+
+- task: dependency-check-build-task@6
+  inputs:
+    projectName: 'oauthapp'
+    scanPath: 'pocs/oauthapp/**'
+    format: 'HTML'
+    uploadReports: true
+    uploadSARIFReport: true
+    failOnCVSS: '9'
+    nvdApiKey: 'eabeca3a-cd32-419d-a181-f7d91ebbf92c'
+
+- script: |
+    # Ensure we are in the build directory to zip contents correctly
+    cd $(buildDir)
+    zip -r $(Build.ArtifactStagingDirectory)/$(artifactName).zip . -x '*.yaml'
+  displayName: 'Create deployment zip'
+- task: CodeQL3000Finalize@0
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
+    ArtifactName: '$(artifactName)'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact'

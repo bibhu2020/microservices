@@ -1,0 +1,11 @@
+DATABASE_URL=""
+# uncomment next line if you use Prisma <5.10
+# DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_vkaFtG8d3XPJ@ep-fancy-hill-a8tm0pqc.eastus2.azure.neon.tech/neondb?sslmode=require"
+AUTH_REDIRCET_URL=http://localhost:8080/auth/redirect
+AZURE_CLIENT_ID=908e42d2-fe86-41b7-8220-6bd41930b3b4
+AZURE_CLIENT_SECRET=
+AZURE_TENANT_ID=95595fde-7f04-4030-ace9-d08cf1e81bdc
+MANAGED_IDENTITY_CLIENT_ID=ddd
+NODE_ENV=development
+# Weather Service 3rd Party API (optional if you do not want to test 3rd party API: https://api.openweathermap.org)
+WEATHER_SERVICE_API_KEY=

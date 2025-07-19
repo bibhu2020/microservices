@@ -1,0 +1,42 @@
+<div class="p-4">
+  <% if (data && data.source) { %>
+    <section class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">Key Vault: <%= data.source %></h2>
+      <p class="text-gray-700">
+        <%= data.value %>
+      </p>
+    </section>
+  <% } %>
+  <% if (data && data.jwtAccessTokenHeader) { %>
+    <section class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">jwtAccessTokenHeader</h2>
+      <p class="text-gray-700">
+        <pre><%= JSON.stringify(data.jwtAccessTokenHeader, null, 2) %></pre>
+      </p>
+    </section>
+  <% } %>
+  <% if (data && data.jwtAccessToken) { %>
+    <section class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">jwtAccessToken</h2>
+      <p class="text-gray-700">
+        <pre><%= JSON.stringify(data.jwtAccessToken, null, 2) %></pre>
+      </p>
+    </section>
+  <% } %>
+  <% if (data && data.jwtIdToken) { %>
+    <section class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">jwtIdToken</h2>
+      <p class="text-gray-700">
+        <pre><%= JSON.stringify(data.jwtIdToken, null, 2) %></pre>
+      </p>
+    </section>
+  <% } %>
+  <% if (data && data.cccc) { %>
+    <section class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">cccc</h2>
+      <p class="text-gray-700">
+        <%= data.ccc %>
+      </p>
+    </section>
+  <% } %>
+</div>

@@ -1,0 +1,122 @@
+import { EmailClient } from "@azure/communication-email";
+import { AzureCliCredential, ManagedIdentityCredential } from "@azure/identity";
+import ServiceBusClientSingleton from "../utility/serviceBusClientSingleton.js";
+import catchAsync from '../utility/catchAsync.js'
+
+class EmailController {
+
+    #sbClient;
+    #emailClient;
+
+    constructor(){
+    }
+
+    sendEmail = catchAsync(async (req, res, next) => {
+        this.#sendEmail(req, res, next, false);
+    });
+
+    sendEmailHtml = catchAsync(async (req, res, next) => {
+        this.#sendEmail(req, res, next, true);
+    });
+
+    queueEmail = catchAsync(async (req, res, next) => {
+        this.#queueEmail(req, res, next, false);
+    });
+
+    queueEmailHtml = catchAsync(async (req, res, next) => {
+        this.#queueEmail(req, res, next, true);
+    });
+
+    #getQSender = async (ServiceBusNameSpace) => {
+        if (!this.#sbClient) {
+            this.#sbClient = await ServiceBusClientSingleton.getInstace(ServiceBusNameSpace); //new ServiceBusClient(sbNamespace,credential);
+        }
+        return this.#sbClient;
+    }
+
+    #getCredential = async () => {
+        let credential = null;  
+        if (credential) {
+            if (process.env.NODE_ENV === "development") { // running code locally? use the logged in user credential
+                credential = new AzureCliCredential();
+            }
+            else { // running in Azure Web App
+                credential = new ManagedIdentityCredential(process.env.MANAGED_IDENTITY_CLIENT_ID);
+            }
+        }
+        return credential
+    }
+
+    #getEmailClient = async () => {
+        if (!this.#emailClient) {
+            const endpoint = process.env.COMMUNICATION_SERVICE_ENDPOINT;
+            const credential = await this.#getCredential();
+            this.#emailClient = new EmailClient(endpoint, credential);
+        }
+        return this.#emailClient;
+    }
+
+    #queueEmail = catchAsync(async (req, res, next, formatHTML = false) => {
+        const {emailFrom, emailTo, emailSubject, emailBody} = req.body;
+        const payload = {
+            emailFrom: emailFrom,
+            emailTo: emailTo,
+            emailSubject: emailSubject,
+            emailBody: emailBody,
+            htmlMessage: formatHTML
+        };
+
+        try {
+            await this.#getQSender(process.env.SERVICE_BUS_NAMESPACE).sendMessageToQueue(process.env.SERVICE_BUS_QUEUE_NAME, payload);
+
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).json({message: "Email successfully queued."});
+        }
+        catch (error) {
+            console.error("An error occurred while writing to queue.", error);
+            next(error);
+        }
+    });
+
+    #sendEmail = catchAsync(async (req, res, next, formatHTML = false) => {
+        try {
+            const {emailFrom, emailTo, emailSubject, emailBody} = req.body;
+
+            const client = await this.#getEmailClient();
+
+            const emailMessage = {
+                senderAddress:  emailFrom ? emailFrom : process.env.SENDER_EMAIL,
+                content: formatHTML ? {
+                    subject: emailSubject,
+                    html: `${emailBody}`,
+                } : {
+                    subject: emailSubject,
+                    plainText: emailBody,
+                },
+                recipients: {
+                    to: [{ address: emailTo }],
+                },
+            };
+
+            console.log(emailMessage);
+        
+            const poller = await client.beginSend(emailMessage);
+            const result = await poller.pollUntilDone();
+            const data = {
+                message: result
+            };
+
+            console.log('Email Message: ' + data);
+
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).json(data);
+        }catch (error) {
+            console.error("An error occurred while sending email:", error);
+            next(error);
+        }
+    });
+
+}
+  
+export default EmailController;
+  

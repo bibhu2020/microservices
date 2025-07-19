@@ -1,0 +1,45 @@
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
+    <h2 class="text-2xl font-bold mb-4">3. Implicit Flow</h2>
+    
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Overview</h3>
+        <p class="mb-4">
+            The Implicit Flow is designed for single-page applications (SPAs) and other public clients (pure JavaScript front-end applications) that cannot securely store a client secret. In this flow, the access token is directly returned in the URL fragment after user authorization. <strong>No Authorization Code involved in the flow.</strong>
+        </p>
+        <img src="/images/oauth-implicit-flow.png" alt="OAuth Implicit Flow" class="mb-6 w-full h-auto rounded-md shadow-sm">
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Steps</h3>
+        <ol class="list-decimal pl-6 space-y-2">
+            <li>A user tries to access the application (the client).</li>
+            <li>The client sends an authorization request to the authorize endpoint. (The client must inform Cloudentity of its desired grant type by using the <code>response_type</code> parameter. For the implicit grant flow type, the value of the <code>response_type</code> parameter must be <code>token</code>.)</li>
+            <pre class="bg-gray-800 text-white p-4 rounded-md">
+curl --location \
+--get \
+--url "https://$TENANT_ID.$REGION_ID.authz.cloudentity.io/$TENANT_ID/$WORKSPACE_ID/oauth2/authorize" \
+--data-urlencode "response_type=token" \
+--data-urlencode "client_id=$CLIENT_ID"
+            </pre>
+            <li>Cloudentity displays a consent screen for the user.</li>
+            <li>The user gives their consent.</li>
+            <li>Cloudentity returns the token embedded in the redirection URI.</li>
+            <li>The client requests protected resources from the resource server and presents the token it received in the previous step.</li>
+            <li>The resource server validates the token and responds with requested resources.</li>
+        </ol>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Use Case</h3>
+        <p class="mb-4">
+            <strong>Single-page applications (SPAs):</strong> This flow is suitable when immediate access to the token is required, and there's no server-side component to handle the token exchange.
+        </p>
+    </div>
+
+    <div>
+        <h3 class="text-xl font-semibold mb-2">Security</h3>
+        <ul class="list-disc pl-6 space-y-2">
+            <li><strong>Moderate security:</strong> The access token is exposed in the URL, making it susceptible to interception.</li>
+        </ul>
+    </div>
+</div>

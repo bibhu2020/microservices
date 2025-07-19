@@ -1,0 +1,97 @@
+
+# Access Token vs. ID Token
+
+## Overview
+
+Access tokens and ID tokens serve different purposes in the context of authentication and authorization. This document outlines the key differences between them.
+
+## Access Token
+
+**Purpose:**
+- Access tokens are used to authorize access to resources (APIs, web services) on behalf of the user.
+- They contain information about the permissions or scopes granted to the client application.
+
+**Contents:**
+- Typically contain information about the user and the permissions (scopes) that have been granted.
+- Do not usually contain detailed information about the user (claims).
+
+**Usage:**
+- Sent in HTTP requests to resource servers (APIs) as a bearer token in the Authorization header (`Authorization: Bearer <access_token>`).
+- Used to gain access to protected resources.
+
+**Lifespan:**
+- Access tokens have a limited lifespan (short-lived) and must be refreshed periodically.
+
+**Example:**
+- An application might use an access token to call an API endpoint to fetch user data.
+
+**Format:**
+- Usually a JWT (JSON Web Token), but can be other formats depending on the implementation.
+
+## ID Token
+
+**Purpose:**
+- ID tokens are used to authenticate the user and provide information about the user’s identity.
+- They confirm the identity of the user and contain user profile information.
+
+**Contents:**
+- Contain claims about the user, such as their name, email address, and other profile information.
+- Issuer, audience, expiration time, and other standard claims are also included.
+
+**Usage:**
+- Sent to the client application after authentication to verify the identity of the user.
+- Not used to access resources or APIs.
+
+**Lifespan:**
+- ID tokens also have a limited lifespan but are primarily used at the time of authentication.
+
+**Example:**
+- An application might use an ID token to display the user's name and profile information after logging in.
+
+**Format:**
+- Usually a JWT (JSON Web Token).
+
+## Example: Access Token vs. ID Token
+
+### Access Token
+```
+{
+  "iss": "https://login.microsoftonline.com/{tenant}/v2.0",
+  "aud": "https://graph.microsoft.com",
+  "exp": 1617758400,
+  "nbf": 1617754500,
+  "iat": 1617754500,
+  "scp": "user.read",
+  "sub": "1234567890",
+  "oid": "abcd1234-abcd-1234-abcd-1234abcd1234",
+  "tid": "abcd1234-abcd-1234-abcd-1234abcd1234",
+  "preferred_username": "user@example.com",
+  "email": "user@example.com"
+}
+```
+
+### ID Token
+```
+{
+  "iss": "https://login.microsoftonline.com/{tenant}/v2.0",
+  "aud": "your-client-id",
+  "exp": 1617758400,
+  "nbf": 1617754500,
+  "iat": 1617754500,
+  "sub": "1234567890",
+  "name": "User Name",
+  "preferred_username": "user@example.com",
+  "email": "user@example.com",
+  "oid": "abcd1234-abcd-1234-abcd-1234abcd1234",
+  "tid": "abcd1234-abcd-1234-abcd-1234abcd1234",
+  "nonce": "xyz123",
+  "auth_time": 1617754500
+}
+```
+
+## Summary
+
+- **Access Token:** Used to access APIs and resources, contains information about permissions, and is sent to resource servers.
+- **ID Token:** Used to authenticate the user, contains user profile information, and is sent to the client application.
+
+Understanding these differences is crucial for implementing secure authentication and authorization flows in your applications.

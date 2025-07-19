@@ -1,0 +1,114 @@
+<div class="container mx-auto mt-10">
+    <h1 class="text-2xl font-bold mb-5">Submitted Purchase Orders</h1>
+    <table class="min-w-full bg-white text-sm"> <!-- Added text-sm for smaller font size -->
+        <thead>
+            <tr>
+                <th class="py-1 px-2 border-b text-left border-r">Id</th>
+                <th class="py-1 px-2 border-b text-left border-r">Submitter Name</th>
+                <th class="py-1 px-2 border-b text-left border-r">Vendor Name</th>
+                <th class="py-1 px-2 border-b text-left border-r">Creation Date</th>
+                <th class="py-1 px-2 border-b text-left border-r">Status</th>
+                <th class="py-1 px-2 border-b text-left border-r">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="poList">
+            <!-- Purchase orders will be dynamically added here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof document.createElement !== 'function') {
+            console.error('document.createElement is not a function');
+            return;
+        }
+
+        const apiURI = '<%= apiURI %>';
+
+        fetch(`${apiURI}/unauthorized/api/po/list`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const poList = document.getElementById('poList');
+                    if (!poList) {
+                        console.error('Element with id "poList" not found');
+                        return;
+                    }
+
+                    poList.innerHTML = '';
+
+                    data.data.forEach(po => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="py-1 px-2 border-b border-r">${po.id}</td>
+                            <td class="py-1 px-2 border-b border-r">${po.submitter || 'N/A'}</td>
+                            <td class="py-1 px-2 border-b border-r">${po.vendorName}</td>
+                            <td class="py-1 px-2 border-b border-r">${new Date(po._ts * 1000).toLocaleDateString()}</td>
+                            <td class="py-1 px-2 border-b border-r">${po.poStatus || 'Pending'}</td>
+                            <td class="py-1 px-2 border-b border-r">
+                                <button class="bg-blue-500 text-white px-1 py-0.5 rounded text-xs edit-btn" data-id="${po.id}" data-vendor="${po.vendorName}" data-submit="${po.submitter}" data-address="${po.shippingAddress}" data-items='${JSON.stringify(po.lineItems)}'>Edit</button>
+                                <button class="bg-red-500 text-white px-1 py-0.5 rounded text-xs delete-btn" data-id="${po.id}" data-vendor="${po.vendorName}">Delete</button>
+                            </td>
+                        `;
+                        poList.appendChild(row);
+                    });
+
+                    // Add event listeners to delete buttons
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const poId = this.getAttribute('data-id');
+                            const vendorName = this.getAttribute('data-vendor');
+                            deletePurchaseOrder(poId, vendorName, this.closest('tr'));
+                        });
+                    });
+
+                    // Add event listeners to edit buttons
+                    document.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const poId = this.getAttribute('data-id');
+                            const vendorName = this.getAttribute('data-vendor');
+                            const submitter = this.getAttribute('data-submit');
+                            const shippingAddress = this.getAttribute('data-address');
+                            const lineItems = JSON.parse(this.getAttribute('data-items'));
+
+                            // Redirect to index.ejs with query parameters
+                            const queryParams = new URLSearchParams({
+                                id: poId,
+                                vendorName: vendorName,
+                                submitter: submitter,
+                                shippingAddress: shippingAddress,
+                                lineItems: JSON.stringify(lineItems)
+                            }).toString();
+
+                            window.location.href = `index?${queryParams}`;
+                        });
+                    });
+                } else {
+                    console.error('Failed to fetch purchase orders:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching purchase orders:', error);
+            });
+    });
+
+    function deletePurchaseOrder(poId, vendorName, rowElement) {
+        fetch(`https://oauthaapi.azurewebsites.net/unauthorized/api/po/delete/${poId}/${vendorName}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                rowElement.remove();
+                alert('Purchase order deleted successfully!');
+            } else {
+                alert('Failed to delete purchase order.');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting purchase order:', error);
+            alert('An error occurred while deleting the purchase order.');
+        });
+    }
+</script>

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package azureapi;
+
+service AzureApiService {
+  rpc readSecret (SecretRequest) returns (SecretResponse);
+}
+message SecretRequest {
+  string kvName = 1;
+  string secretName = 2;
+}
+message SecretResponse {
+  string kvName = 1;
+  string secretName = 2;
+  string secretValue = 3;
+}
+message ErrorResponse {
+  string error = 1;
+}
+

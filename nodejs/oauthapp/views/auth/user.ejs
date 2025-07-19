@@ -1,0 +1,27 @@
+<div>
+  <!-- Hero Section -->
+  <section class="bg-white">
+    <div class="container mx-auto px-6 py-4 text-center">
+      <h1 class="text-5xl font-bold text-gray-800">User Login Status</h1>
+      <% if (data && data.userName) { %>
+      <p class="mt-4 text-gray-600 text-xl">Successfully logged in.</p>
+      <% } else { %>
+      <p class="mt-4 text-gray-600 text-xl">Failed to authenticate.</p>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="bg-gray-100">
+    <div class="container mx-auto px-6 py-4">
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-800">User Information: </h2>
+        <p class="mt-4 text-gray-600 text-xs"><pre><%= data.userInfo %></pre></p>
+      </div>
+      <!-- <div class="mb-12">
+        <h2 class="text-3xl font-bold text-gray-800">User App Roles: </h2>
+        <p class="mt-4 text-gray-600"><pre><%= data.userRoles %></pre></p>
+      </div> -->
+    </div>
+  </section>
+</div>

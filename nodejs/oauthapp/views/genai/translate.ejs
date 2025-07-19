@@ -1,0 +1,107 @@
+
+<style>
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #000;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
+    <h2 class="text-2xl font-bold mb-5">Translation Interface (LangChain)</h2>
+    <form id="translationForm">
+        <div class="mb-4">
+            <label for="language" class="block text-gray-700">Select Language</label>
+            <select id="language" class="block w-full mt-1 p-2 border rounded" required>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ja">Japanese</option>
+                <option value="zh">Chinese</option>
+                <option value="ko">Korean</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="hi">Hindi</option>
+                <option value="ar">Arabic</option>
+                <option value="nl">Dutch</option>
+                <option value="sv">Swedish</option>
+                <option value="tr">Turkish</option>
+                <option value="pl">Polish</option>
+                <option value="th">Thai</option>
+                <option value="he">Hebrew</option>
+
+                <!-- Add more languages as needed -->
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="textToTranslate" class="block text-gray-700">Text to Translate</label>
+            <textarea id="textToTranslate" class="block w-full mt-1 p-2 border rounded" rows="4" required>
+In today's rapidly evolving technological landscape, businesses are continuously seeking innovative solutions to stay ahead of the competition. Cloud computing has emerged as a game-changer, enabling organizations to scale effortlessly, reduce infrastructure costs, and enhance operational efficiency. By leveraging platforms like Microsoft Azure and Amazon Web Services, companies can access a range of tools that streamline processes, from data storage to machine learning applications. As digital transformation becomes more prevalent, the ability to harness the power of the cloud is no longer just a competitive advantage, but a necessity for survival in the modern market.
+            </textarea>
+        </div>
+        <div class="mb-4">
+            <label for="translatedText" class="block text-gray-700">Translated Text</label>
+            <textarea id="translatedText" class="block w-full mt-1 p-2 border rounded" rows="4" readonly></textarea>
+        </div>
+        <div class="flex space-x-4">
+            <button type="button" id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded">Clear</button>
+            <button type="button" id="translateButton" class="bg-blue-500 text-white px-4 py-2 rounded">Translate</button>
+        </div>
+        <div id="loadingMessage" class="mt-4 text-gray-700 hidden flex items-center">
+            <div class="spinner mr-2"></div>Translating...
+        </div>
+        <div id="errorMessage" class="mt-4 text-red-500 hidden">An error occurred while translating the text.</div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('clearButton').addEventListener('click', function() {
+        document.getElementById('textToTranslate').value = '';
+        document.getElementById('translatedText').value = '';
+        document.getElementById('loadingMessage').classList.add('hidden');
+        document.getElementById('errorMessage').classList.add('hidden');
+    });
+
+    document.getElementById('translateButton').addEventListener('click', function() {
+        const language = document.getElementById('language').value;
+        const textToTranslate = document.getElementById('textToTranslate').value;
+
+        if (!language || !textToTranslate) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        const genApiURL = '<%= genApiURL %>/translate';
+
+        document.getElementById('loadingMessage').classList.remove('hidden');
+
+        fetch(genApiURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                language: language,
+                text: textToTranslate
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            document.getElementById('translatedText').value = result.data;
+            document.getElementById('loadingMessage').classList.add('hidden');
+        })
+        .catch(error => {
+            console.error('Error translating text:', error);
+            document.getElementById('loadingMessage').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+        });
+    });
+</script>

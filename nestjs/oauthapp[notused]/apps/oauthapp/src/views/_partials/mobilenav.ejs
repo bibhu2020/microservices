@@ -1,0 +1,47 @@
+<!-- Dropdown Nav -->
+<nav :class="isOpen ? 'flex': 'hidden'" class="flex flex-col pt-4">
+    <a href="/" class="flex items-center active-nav-link text-white py-2 pl-4 nav-item">
+        <i class="fas fa-book mr-3"></i>
+        Home
+    </a>
+    <% if (roles && roles.includes('superadmin')) { %>
+        <a href="/auth/profile" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-user mr-3"></i>
+            My Account
+        </a>
+        <a href="/azure/send-email" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-envelope mr-3"></i>
+            Send Email
+        </a>
+        <a href="/azure/readKv?name=fictokentesting&accessMethod=MI" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-key mr-3"></i>
+            Read KV - MI
+        </a>
+        <a href="/azure/readKv?name=fictokentesting&accessMethod=FIC" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-lock mr-3"></i>
+            Read KV - FIC
+        </a>
+        <a href="/genai/translate" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-globe mr-3"></i>
+            Gen AI - Translate
+        </a>
+        <a href="/genai/chat" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-robot mr-3"></i>
+            Gen AI - Chat
+        </a>
+        <a href="/auth/logout" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Sign Out
+        </a>
+    <% } else { %>
+        <a href="/azure/weather" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-cloud-rain mr-3"></i>
+            Read Weather - 3rd Party
+        </a>
+        <a href="/auth/login" class="flex items-center text-white opacity-75 hover:opacity-100 py-2 pl-4 nav-item">
+            <i class="fas fa-sign-in-alt mr-3"></i>
+            Sign In
+        </a>
+    
+    <% } %>
+</nav>
