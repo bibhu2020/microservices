@@ -30,19 +30,21 @@ jobs:
 
             const branchType = isBug ? 'hotfix' : 'feature';
 
-            // ✅ Extract the full shortname line from the body (not limited to 15 characters)
+            // Extract shortname from issue body (like during creation)
+            const body = issue.body.toLowerCase();
             const shortnameMatch = body.match(/short name for branch.*\n\s*(.+)/i);
             if (!shortnameMatch) {
-              console.log("No shortname found, skipping branch creation.");
+              console.log("No shortname found, skipping branch deletion.");
               return;
             }
 
-            let shortname = shortnameMatch[1]
+            const shortname = shortnameMatch[1]
               .toLowerCase()
-              .replace(/\s+/g, '-')            // Replace spaces with hyphens
+              .replace(/\s+/g, '-')            // Replace spaces with hyphen
               .replace(/[^a-z0-9\-]/g, '')     // Remove invalid characters
               .replace(/-+/g, '-')             // Collapse multiple hyphens into one
               .replace(/^-+|-+$/g, '');        // Trim leading/trailing hyphens
+
 
             const branchName = `${branchType}/${issueNumber}-${shortname}`;
             const fullRef = `heads/${branchName}`;
