@@ -67,8 +67,8 @@ jobs:
               });
             }
 
-            // ✅ Extract shortname from body (e.g., "shortname: feat-login")
-            const shortnameMatch = body.match(/shortname:\s*([a-z0-9\-]+)/i);
+            // ✅ Extract shortname from body markdown after label "Short Name for Branch"
+            const shortnameMatch = body.match(/short name for branch.*\n\s*([a-z0-9\-]{1,15})/i);
             if (!shortnameMatch) {
               console.log("No shortname found, skipping branch creation.");
               return;
