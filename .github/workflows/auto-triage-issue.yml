@@ -1,19 +1,62 @@
+name: Auto Triage New Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write # ✅ needed to create branches
+
+    steps:
+      - name: Add default "needs-triage" label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: needs-triage
+
+      - name: Auto-comment with next steps
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            👋 Thanks for opening this issue!
+
+            Our team will review this shortly. In the meantime:
+            - Please make sure to fill out all required sections of the issue template.
+            - If it's a bug report, include steps to reproduce, expected vs actual results, and logs/screenshots if available.
+
+            ⏳ We'll label and assign this issue soon.
+
+      - name: Auto-assign triage user or team
+        uses: pozil/auto-assign-issue@v1
+        with:
+          assignees: mishrabp
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Apply labels based on issue content and create branch
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const issue = context.payload.issue;
-            const title = issue.title.toLowerCase();
-            const body = issue.body || "";
+            const body = issue.body.toLowerCase();
             const issueNumber = issue.number;
             const labels = [];
 
-            const isBug = title.includes('bug') || body.toLowerCase().includes('error');
-            const isFeature = title.includes('feature') || body.toLowerCase().includes('enhancement');
+            const isBug = body.includes('type: bug') || body.includes('bug') || body.includes('error');
+            const isFeature = body.includes('type: feature') || body.includes('feature') || body.includes('enhancement');
 
-            if (isBug) labels.push('bug');
-            if (isFeature) labels.push('enhancement');
+            if (isBug) {
+              labels.push('bug');
+            }
+
+            if (isFeature) {
+              labels.push('enhancement');
+            }
 
             if (labels.length > 0) {
               await github.rest.issues.addLabels({
@@ -24,28 +67,45 @@
               });
             }
 
-            // ✅ Determine branch type
+            // ✅ Extract shortname from body (e.g., "shortname: feat-login")
+            const shortnameMatch = body.match(/shortname:\s*([a-z0-9\-]+)/i);
+            if (!shortnameMatch) {
+              console.log("No shortname found, skipping branch creation.");
+              return;
+            }
+
+            const shortname = shortnameMatch[1].toLowerCase();
+
             const branchType = isBug ? 'hotfix' : isFeature ? 'feature' : null;
             if (!branchType) {
               console.log("Not a bug or feature, skipping branch creation.");
               return;
             }
 
-            // ✅ Extract "shortname" from issue body using regex
-            const shortnameMatch = body.match(/###\s*Short Name\s*\n([\s\S]*?)\n\s*###/i) || 
-                                   body.match(/(?<=short name[:]*\s*)([a-zA-Z0-9-_]+)/i);
+            const newBranch = `${branchType}/${issueNumber}-${shortname}`;
 
-            const shortname = shortnameMatch ? shortnameMatch[1].trim().toLowerCase().replace(/[^a-z0-9-]/g, '-') : 'no-title';
-
-            const branchName = `${branchType}/${issueNumber}-${shortname}`.substring(0, 50);
-
-            // ✅ Get latest commit SHA from main
-            const mainBranch = await github.rest.repos.getBranch({
+            // ✅ Get latest commit SHA on main
+            const mainRef = await github.rest.repos.getBranch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               branch: 'main',
             });
 
-            const mainSha = mainBranch.data.commit.sha;
+            const mainSha = mainRef.data.commit.sha;
 
-            // ✅ Cr
+            // ✅ Create the new branch
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/heads/${newBranch}`,
+              sha: mainSha,
+            });
+
+            console.log(`Branch '${newBranch}' created from 'main'.`);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `🚀 Branch \`${newBranch}\` created from \`main\`. You can start work on this now.`
+            });
