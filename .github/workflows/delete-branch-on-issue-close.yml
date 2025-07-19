@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write # ✅ needed to comment on the issue
 
     steps:
       - name: Check and delete branch
