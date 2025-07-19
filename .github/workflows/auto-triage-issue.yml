@@ -79,7 +79,7 @@ jobs:
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, '-')   // Replace non-alphanumerics with hyphen
               .replace(/^-+|-+$/g, '')        // Trim leading/trailing hyphens
-              .substring(0, 10);
+              .substring(0, 25);
 
             const newBranch = `${branchType}/${issueNumber}-${titleSlug}`;
 
