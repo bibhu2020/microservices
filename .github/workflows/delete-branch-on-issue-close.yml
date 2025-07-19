@@ -38,6 +38,12 @@ jobs:
               return;
             }
             const shortname = shortnameMatch[1].toLowerCase();
+            shortname = shortname
+              .toLowerCase()
+              .replace(/\s+/g, '-')            // Replace spaces with hyphen
+              .replace(/[^a-z0-9\-]/g, '')     // Remove invalid characters
+              .replace(/-+/g, '-')             // Collapse multiple hyphens into one
+              .replace(/^-+|-+$/g, '');        // Trim leading/trailing hyphens
 
             const branchName = `${branchType}/${issueNumber}-${shortname}`;
             const fullRef = `heads/${branchName}`;

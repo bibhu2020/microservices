@@ -75,6 +75,12 @@ jobs:
             }
 
             const shortname = shortnameMatch[1].toLowerCase();
+            shortname = shortname
+              .toLowerCase()
+              .replace(/\s+/g, '-')            // Replace spaces with hyphen
+              .replace(/[^a-z0-9\-]/g, '')     // Remove invalid characters
+              .replace(/-+/g, '-')             // Collapse multiple hyphens into one
+              .replace(/^-+|-+$/g, '');        // Trim leading/trailing hyphens
 
             const branchType = isBug ? 'hotfix' : isFeature ? 'feature' : null;
             if (!branchType) {
