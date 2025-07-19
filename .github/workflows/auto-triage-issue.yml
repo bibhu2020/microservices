@@ -34,7 +34,7 @@ jobs:
       - name: Auto-assign triage user or team
         uses: pozil/auto-assign-issue@v1
         with:
-          assignees: bibhu2020
+          assignees: mishrabp
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply labels based on issue content and create branch
