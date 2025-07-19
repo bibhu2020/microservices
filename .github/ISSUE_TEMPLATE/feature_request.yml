@@ -20,16 +20,6 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: app
-    attributes:
-      label: Application Target
-      description: What part of the app is this for?
-      options:
-        - CMS
-        - eCommerce
-        - Both
-
   - type: textarea
     id: motivation
     attributes:
