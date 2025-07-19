@@ -3,6 +3,15 @@ description: Report a reproducible bug
 title: '[Bug]: '
 labels: [bug, needs-triage]
 body:
+  - type: input
+    id: shortname
+    attributes:
+      label: Short Name for Branch
+      description: Enter a short, meaningful name (max 15 characters) to help name the branch.
+      placeholder: e.g., login-error
+    validations:
+      required: true
+
   - type: textarea
     id: description
     attributes:
