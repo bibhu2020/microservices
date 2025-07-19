@@ -67,16 +67,16 @@ jobs:
               });
             }
 
-            // ✅ Extract shortname from body markdown after label "Short Name for Branch"
-            const shortnameMatch = body.match(/short name for branch.*\n\s*([a-z0-9\-]{1,15})/i);
+            // ✅ Extract the full shortname line from the body (not limited to 15 characters)
+            const shortnameMatch = body.match(/short name for branch.*\n\s*(.+)/i);
             if (!shortnameMatch) {
               console.log("No shortname found, skipping branch creation.");
               return;
             }
 
-            const shortname = shortnameMatch[1]
+            let shortname = shortnameMatch[1]
               .toLowerCase()
-              .replace(/\s+/g, '-')            // Replace spaces with hyphen
+              .replace(/\s+/g, '-')            // Replace spaces with hyphens
               .replace(/[^a-z0-9\-]/g, '')     // Remove invalid characters
               .replace(/-+/g, '-')             // Collapse multiple hyphens into one
               .replace(/^-+|-+$/g, '');        // Trim leading/trailing hyphens
