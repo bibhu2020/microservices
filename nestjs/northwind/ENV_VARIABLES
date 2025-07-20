@@ -1,6 +1,6 @@
 DATABASE_URL=""
 # uncomment next line if you use Prisma <5.10
-# DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_vkaFtG8d3XPJ@ep-fancy-hill-a8tm0pqc.eastus2.azure.neon.tech/neondb?sslmode=require"
+# DATABASE_URL_UNPOOLED=""
 AUTH_REDIRCET_URL=http://localhost:8080/auth/redirect
 AZURE_CLIENT_ID=908e42d2-fe86-41b7-8220-6bd41930b3b4
 AZURE_CLIENT_SECRET=
